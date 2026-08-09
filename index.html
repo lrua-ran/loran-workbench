@@ -531,7 +531,10 @@ textarea.text-input{resize:vertical;min-height:60px}
         <button class="btn-sm" id="btnExport">导出JSON</button>
         <button class="btn-sm" id="btnImport">导入恢复</button>
       </div>
-      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v4.5 · 微信直连 · 基金实时 · 政经双频</div>
+      <div class="sidebar-foot-row">
+        <button class="btn-sm" id="btnCloudPush" title="一键备份到GitHub云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
+      </div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v4.6 · 云端同步 · 微信直连 · 基金实时</div>
     </div>
   </aside>
 
@@ -1672,6 +1675,7 @@ function bindEvents(){
   $('#sidebarToggle').onclick=toggleSidebar;$('#sidebarClose').onclick=closeSidebar;$('#sidebarOverlay').onclick=closeSidebar;
   $('#btnExport').onclick=exportData;$('#btnImport').onclick=importData;
   $('#btnSyncOut').onclick=syncExport;$('#btnSyncIn').onclick=syncImport;
+  $('#btnCloudPush').onclick=cloudPush;autoCloudCheck();
   document.getElementById('imgInput').onchange=handleImageUpload;
   $('#themeBtn').onclick=cycleTheme;
   document.addEventListener('keydown',e=>{
@@ -1706,7 +1710,103 @@ window.cycleLearn=cycleLearn;window.toggleAnswer=toggleAnswer;
 window.addCollect=addCollect;window.addTx=addTx;window.editTx=editTx;window.uploadReceipt=uploadReceipt;window.handleTxReceipt=handleTxReceipt;window.viewReceipt=viewReceipt;window.clearFundImages=clearFundImages;window.bulkImportFunds=bulkImportFunds;
 window.updateBook=updateBook;window.switchBook=switchBook;window.addBook=addBook;window.removeBook=removeBook;window.toggleAddBook=toggleAddBook;window.saveReadingNotes=saveReadingNotes;window.importWereadNotes=importWereadNotes;window.toggleChapter=toggleChapter;window.clearWereadNotes=clearWereadNotes;window.openWeread=openWeread;
 window.toggleArchive=toggleArchive;window.syncExport=syncExport;window.syncImport=syncImport;
+window.cloudPush=cloudPush;window.cloudPull=cloudPull;
 window.editTodo=editTodo;
+
+/* ===== GitHub 云端同步 ===== */
+const GITHUB_USERNAME = 'lrua-ran';
+const GITHUB_REPO = 'loran-workbench';
+const CLOUD_FILE  = 'workbench-data.json';
+
+function getGitHubToken(){
+  let token = localStorage.getItem('loran_gh_token');
+  if(!token){
+    token = prompt('🔐 首次云同步，请输入 GitHub Personal Access Token：\n（创建地址：github.com/settings/tokens → 勾选 repo 权限）');
+    if(token){localStorage.setItem('loran_gh_token',token)}
+    else{return null}
+  }
+  return token;
+}
+
+async function cloudPush(){
+  const token = getGitHubToken(); if(!token)return;
+  const status = $('#statusBadge'); if(status) status.textContent = '⟳ 同步中';
+  // 收集所有 loran_ 前缀数据
+  const allData = {};
+  for(let i=0; i<localStorage.length; i++){
+    const k = localStorage.key(i);
+    if(k.startsWith('loran_') && k!=='loran_gh_token') allData[k]=localStorage.getItem(k);
+  }
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(allData))));
+  const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
+  try{
+    let sha=null;
+    const g=await fetch(url,{headers:{Authorization:`token ${token}`,'Accept':'application/vnd.github.v3+json'}});
+    if(g.ok){const d=await g.json();sha=d.sha}
+    const p=await fetch(url,{
+      method:'PUT',
+      headers:{Authorization:`token ${token}`,'Content-Type':'application/json'},
+      body:JSON.stringify({message:new Date().toLocaleString(),content:b64,sha})
+    });
+    if(p.ok){if(status)status.textContent='● 已同步'}
+    else{const e=await p.json();alert('云同步失败：'+(e.message||'请检查Token权限'))}
+  }catch(e){alert('网络错误，请重试')}
+  if(status)setTimeout(()=>{status.textContent='● 实时'},3000);
+}
+
+async function cloudPull(){
+  const token = getGitHubToken(); if(!token)return;
+  if(!confirm('将从 GitHub 云端恢复数据，覆盖本地。确认继续？'))return;
+  const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
+  try{
+    const r=await fetch(url,{headers:{Authorization:`token ${token}`,'Accept':'application/vnd.github.v3+json'}});
+    if(r.status===404){alert('云端暂无备份数据');return}
+    if(!r.ok){alert('拉取失败：'+r.status);return}
+    const d=await r.json();
+    const cloud=JSON.parse(decodeURIComponent(escape(atob(d.content))));
+    let count=0;
+    for(const k in cloud){
+      if(k.startsWith('loran_')&&k!=='loran_gh_token'){localStorage.setItem(k,cloud[k]);count++}
+    }
+    if(count>0){alert('已从云端恢复 '+count+' 条数据！即将刷新');location.reload()}
+    else{alert('云端数据为空')}
+  }catch(e){alert('网络错误：'+e.message)}
+}
+
+// 自动备份：数据变更后延迟上传
+let _cloudTimer=null;
+function autoCloudSave(){
+  clearTimeout(_cloudTimer);
+  _cloudTimer=setTimeout(cloudPush,8000); // 8秒无操作后自动备份
+}
+
+// 监听 localStorage 写入
+const _origSetItem = Storage.prototype.setItem;
+Storage.prototype.setItem = function(key, value){
+  _origSetItem.call(this, key, value);
+  if(key.startsWith('loran_') && key!=='loran_gh_token') autoCloudSave();
+};
+
+// 启动时尝试自动拉取（如果本地无数据且云端有）
+async function autoCloudCheck(){
+  const token = localStorage.getItem('loran_gh_token');
+  if(!token)return; // 没配Token就跳过
+  // 检查本地是否有数据
+  let hasLocal = false;
+  for(let i=0;i<localStorage.length;i++){if(localStorage.key(i).startsWith('loran_')&&localStorage.key(i)!=='loran_gh_token'){hasLocal=true;break}}
+  if(hasLocal)return; // 本地有数据就不拉取
+  const url=`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
+  try{
+    const r=await fetch(url,{headers:{Authorization:`token ${token}`,'Accept':'application/vnd.github.v3+json'}});
+    if(r.ok){
+      const d=await r.json();
+      const cloud=JSON.parse(decodeURIComponent(escape(atob(d.content))));
+      let count=0;
+      for(const k in cloud){if(k.startsWith('loran_')&&k!=='loran_gh_token'){localStorage.setItem(k,cloud[k]);count++}}
+      if(count>0){location.reload()} // 云端有数据且本地为空，自动恢复后刷新
+    }
+  }catch(e){}
+}
 
 init();
 </script>
