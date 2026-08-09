@@ -534,7 +534,7 @@ textarea.text-input{resize:vertical;min-height:60px}
       <div class="sidebar-foot-row">
         <button class="btn-sm" id="btnCloudPush" title="一键备份到GitHub云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
       </div>
-      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v4.6 · 云端同步 · 微信直连 · 基金实时</div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v4.7 · Gist云同步 · 微信直连 · 基金实时</div>
     </div>
   </aside>
 
@@ -1713,15 +1713,13 @@ window.toggleArchive=toggleArchive;window.syncExport=syncExport;window.syncImpor
 window.cloudPush=cloudPush;window.cloudPull=cloudPull;
 window.editTodo=editTodo;
 
-/* ===== GitHub 云端同步 ===== */
-const GITHUB_USERNAME = 'lrua-ran';
-const GITHUB_REPO = 'loran-workbench';
-const CLOUD_FILE  = 'workbench-data.json';
+/* ===== GitHub Gist 云端同步 ===== */
+const GIST_DESC = 'Loran Workbench 自动备份';
 
 function getGitHubToken(){
   let token = localStorage.getItem('loran_gh_token');
   if(!token){
-    token = prompt('🔐 首次云同步，请输入 GitHub Token：\n\n① 打开 github.com/settings/tokens\n② 点 "Generate new token (classic)"\n③ 勾选 repo（全部）\n④ 生成后粘贴到这里');
+    token = prompt('🔐 首次云同步，请输入 GitHub Token：\n\n① 打开 github.com/settings/tokens\n② Generate new token → Fine-grained\n③ 选 lrua-ran 账户\n④ Repository access: All repositories\n⑤ Permissions → Gists → Read and write\n⑥ 生成后粘贴到这里');
     if(token){localStorage.setItem('loran_gh_token',token)}
     else{return null}
   }
@@ -1734,91 +1732,81 @@ async function cloudPush(){
   const allData = {};
   for(let i=0; i<localStorage.length; i++){
     const k = localStorage.key(i);
-    if(k.startsWith('loran_') && k!=='loran_gh_token') allData[k]=localStorage.getItem(k);
+    if(k!=='loran_gh_token'&&k!=='loran_gist_id') allData[k]=localStorage.getItem(k);
   }
-  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(allData))));
-  const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
+  const body = {description:GIST_DESC,public:false,files:{'loran-backup.json':{content:JSON.stringify(allData)}}};
+  let gistId = localStorage.getItem('loran_gist_id');
   try{
-    let sha=null;
-    const g=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}});
-    if(g.ok){const d=await g.json();sha=d.sha}
-    else if(g.status===401||g.status===403){
-      localStorage.removeItem('loran_gh_token');
-      alert('Token 无效或权限不足！\n\n请重新生成 Classic Token：\n① github.com/settings/tokens\n② Generate new token (classic)\n③ 勾选 repo 权限\n④ 确保仓库 lrua-ran/loran-workbench 是公开的');
-      if(status)status.textContent='● 离线';return;
+    let res;
+    if(gistId){
+      // 更新已有 Gist
+      res = await fetch(`https://api.github.com/gists/${gistId}`,{
+        method:'PATCH',
+        headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
+        body:JSON.stringify({files:{'loran-backup.json':{content:JSON.stringify(allData)}}})
+      });
+    }else{
+      // 创建新 Gist
+      res = await fetch('https://api.github.com/gists',{
+        method:'POST',
+        headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
+        body:JSON.stringify(body)
+      });
+      if(res.ok){const d=await res.json();gistId=d.id;localStorage.setItem('loran_gist_id',gistId)}
     }
-    const p=await fetch(url,{
-      method:'PUT',
-      headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'backup '+new Date().toLocaleString(),content:b64,sha})
-    });
-    if(p.ok){if(status)status.textContent='● 已同步'}
-    else{
-      const e=await p.json();
-      if(p.status===401||p.status===403){localStorage.removeItem('loran_gh_token')}
-      alert('云同步失败：'+(e.message||'HTTP '+p.status))
+    if(res.ok){if(status)status.textContent='● 已同步'}
+    else if(res.status===401||res.status===403){
+      localStorage.removeItem('loran_gh_token');localStorage.removeItem('loran_gist_id');
+      alert('Token 无效！请重新生成：\n① 勾选 Gists → Read and write\n② 确保 Token 没有过期');
+    }else{
+      const e=await res.json().catch(()=>({}));
+      alert('云同步失败：'+(e.message||'HTTP '+res.status))
     }
-  }catch(e){alert('网络错误：请检查是否能访问 github.com\n'+e.message)}
+  }catch(e){alert('网络错误：'+e.message)}
   if(status)setTimeout(()=>{if(status.textContent!=='● 离线')status.textContent='● 实时'},3000);
 }
 
 async function cloudPull(){
   let token = getGitHubToken(); if(!token)return;
-  if(!confirm('将从云端恢复数据，覆盖本地所有数据。确认继续？'))return;
-  const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
+  let gistId = localStorage.getItem('loran_gist_id');
+  if(!gistId){gistId = prompt('请输入 Gist ID（首次使用请先在另一台设备执行云备份获取）：');if(!gistId)return}
+  if(!confirm('将从云端恢复数据，覆盖本地。确认继续？'))return;
   try{
-    const r=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}});
-    if(r.status===401||r.status===403){
-      localStorage.removeItem('loran_gh_token');
-      alert('Token 无效！请重新生成并确保仓库是公开的');
-      return;
-    }
-    if(r.status===404){alert('云端暂无备份数据');return}
+    const r = await fetch(`https://api.github.com/gists/${gistId}`,{
+      headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}
+    });
+    if(r.status===401||r.status===403){localStorage.removeItem('loran_gh_token');alert('Token 无效！');return}
+    if(r.status===404){alert('Gist 不存在，请确认 ID 正确');return}
     if(!r.ok){alert('拉取失败：HTTP '+r.status);return}
-    const d=await r.json();
-    const cloud=JSON.parse(decodeURIComponent(escape(atob(d.content))));
-    let count=0;
-    for(const k in cloud){
-      if(k.startsWith('loran_')&&k!=='loran_gh_token'){localStorage.setItem(k,cloud[k]);count++}
-    }
-    if(count>0){alert('已从云端恢复 '+count+' 条数据！即将刷新');location.reload()}
-    else{alert('云端数据为空')}
+    const d = await r.json();
+    const file = d.files&&d.files['loran-backup.json'];
+    if(!file||!file.content){alert('Gist 中无备份数据');return}
+    const cloud = JSON.parse(file.content);
+    let count = 0;
+    for(const k in cloud){localStorage.setItem(k,cloud[k]);count++}
+    localStorage.setItem('loran_gist_id',gistId);
+    if(count>0){alert('已恢复 '+count+' 条数据！刷新中...');location.reload()}
   }catch(e){alert('网络错误：'+e.message)}
 }
 
-// 自动备份：数据变更后延迟上传
+// 自动备份
 let _cloudTimer=null;
-function autoCloudSave(){
-  clearTimeout(_cloudTimer);
-  _cloudTimer=setTimeout(cloudPush,8000); // 8秒无操作后自动备份
-}
+function autoCloudSave(){clearTimeout(_cloudTimer);_cloudTimer=setTimeout(cloudPush,8000)}
+const _origSetItem=Storage.prototype.setItem;
+Storage.prototype.setItem=function(k,v){_origSetItem.call(this,k,v);if(k!=='loran_gh_token'&&k!=='loran_gist_id')autoCloudSave()};
 
-// 监听 localStorage 写入
-const _origSetItem = Storage.prototype.setItem;
-Storage.prototype.setItem = function(key, value){
-  _origSetItem.call(this, key, value);
-  if(key.startsWith('loran_') && key!=='loran_gh_token') autoCloudSave();
-};
-
-// 启动时尝试自动拉取（如果本地无数据且云端有）
+// 启动自动检查
 async function autoCloudCheck(){
-  const token = localStorage.getItem('loran_gh_token');
-  if(!token)return; // 没配Token就跳过
-  // 检查本地是否有数据
-  let hasLocal = false;
-  for(let i=0;i<localStorage.length;i++){if(localStorage.key(i).startsWith('loran_')&&localStorage.key(i)!=='loran_gh_token'){hasLocal=true;break}}
-  if(hasLocal)return; // 本地有数据就不拉取
-  const url=`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
-  try{
-    const r=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}});
-    if(r.ok){
-      const d=await r.json();
-      const cloud=JSON.parse(decodeURIComponent(escape(atob(d.content))));
-      let count=0;
-      for(const k in cloud){if(k.startsWith('loran_')&&k!=='loran_gh_token'){localStorage.setItem(k,cloud[k]);count++}}
-      if(count>0){location.reload()} // 云端有数据且本地为空，自动恢复后刷新
-    }
-  }catch(e){}
+  const token=localStorage.getItem('loran_gh_token');
+  if(!token||localStorage.getItem('loran_gist_id'))return;
+  let hasLocal=false;
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k!=='loran_gh_token'&&k!=='loran_gist_id'){hasLocal=true;break}}
+  if(hasLocal)return;
+  // 本地无数据 → 提示是否从云端恢复
+  const gid=prompt('📱 检测到新设备！\n\n请输入另一台设备生成的 Gist ID 来恢复数据：\n（可在已备份的设备侧边栏查看）');
+  if(!gid)return;
+  localStorage.setItem('loran_gist_id',gid);
+  await cloudPull();
 }
 
 init();
