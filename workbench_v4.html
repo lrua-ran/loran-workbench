@@ -1721,7 +1721,7 @@ const CLOUD_FILE  = 'workbench-data.json';
 function getGitHubToken(){
   let token = localStorage.getItem('loran_gh_token');
   if(!token){
-    token = prompt('🔐 首次云同步，请输入 GitHub Personal Access Token：\n（创建地址：github.com/settings/tokens → 勾选 repo 权限）');
+    token = prompt('🔐 首次云同步，请输入 GitHub Token：\n\n① 打开 github.com/settings/tokens\n② 点 "Generate new token (classic)"\n③ 勾选 repo（全部）\n④ 生成后粘贴到这里');
     if(token){localStorage.setItem('loran_gh_token',token)}
     else{return null}
   }
@@ -1729,9 +1729,8 @@ function getGitHubToken(){
 }
 
 async function cloudPush(){
-  const token = getGitHubToken(); if(!token)return;
+  let token = getGitHubToken(); if(!token)return;
   const status = $('#statusBadge'); if(status) status.textContent = '⟳ 同步中';
-  // 收集所有 loran_ 前缀数据
   const allData = {};
   for(let i=0; i<localStorage.length; i++){
     const k = localStorage.key(i);
@@ -1741,27 +1740,41 @@ async function cloudPush(){
   const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
   try{
     let sha=null;
-    const g=await fetch(url,{headers:{Authorization:`token ${token}`,'Accept':'application/vnd.github.v3+json'}});
+    const g=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}});
     if(g.ok){const d=await g.json();sha=d.sha}
+    else if(g.status===401||g.status===403){
+      localStorage.removeItem('loran_gh_token');
+      alert('Token 无效或权限不足！\n\n请重新生成 Classic Token：\n① github.com/settings/tokens\n② Generate new token (classic)\n③ 勾选 repo 权限\n④ 确保仓库 lrua-ran/loran-workbench 是公开的');
+      if(status)status.textContent='● 离线';return;
+    }
     const p=await fetch(url,{
       method:'PUT',
-      headers:{Authorization:`token ${token}`,'Content-Type':'application/json'},
-      body:JSON.stringify({message:new Date().toLocaleString(),content:b64,sha})
+      headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
+      body:JSON.stringify({message:'backup '+new Date().toLocaleString(),content:b64,sha})
     });
     if(p.ok){if(status)status.textContent='● 已同步'}
-    else{const e=await p.json();alert('云同步失败：'+(e.message||'请检查Token权限'))}
-  }catch(e){alert('网络错误，请重试')}
-  if(status)setTimeout(()=>{status.textContent='● 实时'},3000);
+    else{
+      const e=await p.json();
+      if(p.status===401||p.status===403){localStorage.removeItem('loran_gh_token')}
+      alert('云同步失败：'+(e.message||'HTTP '+p.status))
+    }
+  }catch(e){alert('网络错误：请检查是否能访问 github.com\n'+e.message)}
+  if(status)setTimeout(()=>{if(status.textContent!=='● 离线')status.textContent='● 实时'},3000);
 }
 
 async function cloudPull(){
-  const token = getGitHubToken(); if(!token)return;
-  if(!confirm('将从 GitHub 云端恢复数据，覆盖本地。确认继续？'))return;
+  let token = getGitHubToken(); if(!token)return;
+  if(!confirm('将从云端恢复数据，覆盖本地所有数据。确认继续？'))return;
   const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
   try{
-    const r=await fetch(url,{headers:{Authorization:`token ${token}`,'Accept':'application/vnd.github.v3+json'}});
+    const r=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}});
+    if(r.status===401||r.status===403){
+      localStorage.removeItem('loran_gh_token');
+      alert('Token 无效！请重新生成并确保仓库是公开的');
+      return;
+    }
     if(r.status===404){alert('云端暂无备份数据');return}
-    if(!r.ok){alert('拉取失败：'+r.status);return}
+    if(!r.ok){alert('拉取失败：HTTP '+r.status);return}
     const d=await r.json();
     const cloud=JSON.parse(decodeURIComponent(escape(atob(d.content))));
     let count=0;
@@ -1797,7 +1810,7 @@ async function autoCloudCheck(){
   if(hasLocal)return; // 本地有数据就不拉取
   const url=`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
   try{
-    const r=await fetch(url,{headers:{Authorization:`token ${token}`,'Accept':'application/vnd.github.v3+json'}});
+    const r=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}});
     if(r.ok){
       const d=await r.json();
       const cloud=JSON.parse(decodeURIComponent(escape(atob(d.content))));
