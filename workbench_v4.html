@@ -2,561 +2,502 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Loran · 工作台</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#F2EBDE">
-<link rel="manifest" href="data:application/json,{}">
 <style>
 :root{
-  --bg:           #F2EBDE;
-  --bg-deep:      #E8DECC;
-  --paper:        #FBF7EE;
-  --paper-edge:   #F0E8D6;
-  --ink:          #2A2419;
-  --ink-soft:     #5C5246;
-  --ink-faint:    #9A8F7C;
-  --rule:         #DDD2BB;
-  --gold:         #B08A4E;
-  --gold-soft:    #C9A878;
-  --gold-glow:    rgba(176,138,78,.18);
-  --vermilion:    #B84A38;
-  --jade:         #5C7A5A;
-  --shadow:       0 2px 8px rgba(90,70,40,.06), 0 12px 32px rgba(90,70,40,.04);
-  --shadow-hover: 0 6px 20px rgba(90,70,40,.10), 0 16px 40px rgba(90,70,40,.06);
-  --sidebar-w:    320px;
-  --radius:       14px;
+  --bg:#F2EBDE; --bg-deep:#E8DECC; --paper:#FBF7EE;
+  --paper-edge:#F0E8D6; --ink:#2A2419; --ink-soft:#5C5246;
+  --ink-faint:#9A8F7C; --rule:#DDD2BB; --gold:#B08A4E;
+  --gold-soft:#C9A878; --gold-glow:rgba(176,138,78,.18);
+  --vermilion:#B84A38; --jade:#5C7A5A;
+  --blue:#4A7FB5; --blue-light:#D8E6F3; --blue-glow:rgba(74,127,181,.15);
+  --shadow:0 2px 8px rgba(90,70,40,.06),0 12px 32px rgba(90,70,40,.04);
+  --shadow-hover:0 6px 20px rgba(90,70,40,.10),0 16px 40px rgba(90,70,40,.06);
 }
-
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{
-  font-family:"Noto Sans SC","PingFang SC",-apple-system,sans-serif;
-  background:var(--bg);
-  color:var(--ink);
-  font-size:14px;
-  line-height:1.7;
-  letter-spacing:.02em;
-  font-weight:400;
-  -webkit-font-smoothing:antialiased;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--ink);font-size:13px;line-height:1.7;
+  letter-spacing:.02em;font-weight:400;-webkit-font-smoothing:antialiased;
   overflow-x:hidden;
-  -webkit-tap-highlight-color:transparent;
+  background-image:var(--bg-pattern,transparent);
+  background-attachment:fixed;
 }
-.serif{font-family:"Noto Serif SC","Cormorant Garamond",Georgia,serif;font-weight:500;letter-spacing:.04em}
 
-/* ===== 布局 ===== */
-.app{min-height:100vh;display:flex}
-
-/* ===== Toast ===== */
-.toast{
-  position:fixed;top:24px;left:50%;transform:translateX(-50%);
-  background:var(--ink);color:var(--paper);
-  padding:12px 28px;border-radius:28px;
-  font-size:13px;letter-spacing:.06em;z-index:3000;
-  opacity:0;transition:opacity .35s,transform .35s;
-  pointer-events:none;white-space:nowrap;
-  box-shadow:0 4px 16px rgba(42,36,25,.25);
+/* ===== 主题 2 · 水墨山水 ===== */
+:root[data-theme="ink"]{
+  --bg:#E8E5DE;
+  --bg-deep:#D4D8DA;
+  --paper:#F4F2EC;
+  --paper-edge:#E0DFD7;
+  --ink:#1F2935;
+  --ink-soft:#4A5460;
+  --ink-faint:#8A949E;
+  --rule:#C4C8C4;
+  --gold:#5C788A;
+  --gold-soft:#7B96A6;
+  --gold-glow:rgba(92,120,138,.15);
+  --vermilion:#9B4A40;
+  --jade:#5F7A6A;
+  --blue:#2C4A66;
+  --blue-light:#CCD8E2;
+  --blue-glow:rgba(44,74,102,.15);
+  --shadow:0 2px 10px rgba(30,40,55,.06),0 12px 32px rgba(30,40,55,.05);
+  --shadow-hover:0 6px 22px rgba(30,40,55,.10),0 16px 40px rgba(30,40,55,.07);
+  --bg-pattern:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='800'%3E%3Cfilter id='b'%3E%3CfeTurbulence baseFrequency='0.007' numOctaves='3' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.17 0 0 0 0 0.29 0 0 0 0 0.40 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3Cpath d='M80 700 Q200 500 350 620 T600 560' stroke='rgba(44,74,102,0.08)' fill='none' stroke-width='60' stroke-linecap='round'/%3E%3Cpath d='M20 650 Q150 580 300 640 T580 600' stroke='rgba(155,74,64,0.04)' fill='none' stroke-width='40' stroke-linecap='round'/%3E%3C/svg%3E"),
+    radial-gradient(circle at 8% 4%,rgba(44,74,102,.10) 0,transparent 20%),
+    radial-gradient(circle at 92% 96%,rgba(44,74,102,.08) 0,transparent 24%),
+    radial-gradient(circle at 30% 80%,rgba(155,74,64,.05) 0,transparent 14%);
 }
-.toast.show{opacity:1;transform:translateX(-50%) translateY(4px)}
-.toast.warn{background:var(--vermilion)}
-.toast.ok{background:var(--jade)}
 
-/* ===== 侧边栏（桌面常驻 / 移动抽屉） ===== */
+/* ===== 主题 3 · 暮光玫瑰 ===== */
+:root[data-theme="rose"]{
+  --bg:#F8EBE6;
+  --bg-deep:#ECD6CF;
+  --paper:#FEF9F6;
+  --paper-edge:#F0E4DE;
+  --ink:#3D2226;
+  --ink-soft:#6B4E52;
+  --ink-faint:#9E8588;
+  --rule:#DDC8C2;
+  --gold:#C46E68;
+  --gold-soft:#D89B95;
+  --gold-glow:rgba(196,110,104,.15);
+  --vermilion:#B84855;
+  --jade:#6A8A70;
+  --blue:#7A6570;
+  --blue-light:#E6D9DD;
+  --blue-glow:rgba(122,101,112,.12);
+  --shadow:0 2px 10px rgba(80,30,40,.05),0 12px 32px rgba(80,30,40,.04);
+  --shadow-hover:0 6px 22px rgba(80,30,40,.09),0 16px 40px rgba(80,30,40,.06);
+  --bg-pattern:
+    radial-gradient(circle at 15% 8%,rgba(196,110,104,.08) 0,transparent 22%),
+    radial-gradient(circle at 88% 90%,rgba(106,138,112,.06) 0,transparent 20%),
+    radial-gradient(circle at 50% 60%,rgba(196,110,104,.04) 0,transparent 16%);
+}
+
+/* ===== 主题 4 · 夜色墨卷 ===== */
+:root[data-theme="night"]{
+  --bg:#1A1C22;
+  --bg-deep:#131418;
+  --paper:#23252C;
+  --paper-edge:#31333B;
+  --ink:#D4D6DC;
+  --ink-soft:#9A9DA6;
+  --ink-faint:#6B6E77;
+  --rule:#31333B;
+  --gold:#C9A878;
+  --gold-soft:#A89068;
+  --gold-glow:rgba(201,168,120,.12);
+  --vermilion:#D4756B;
+  --jade:#7DA088;
+  --blue:#7B8FA8;
+  --blue-light:#2A303A;
+  --blue-glow:rgba(123,143,168,.12);
+  --shadow:0 2px 12px rgba(0,0,0,.25),0 8px 28px rgba(0,0,0,.20);
+  --shadow-hover:0 4px 20px rgba(0,0,0,.35),0 12px 36px rgba(0,0,0,.25);
+  --bg-pattern:
+    radial-gradient(circle at 5% 3%,rgba(123,143,168,.06) 0,transparent 14%),
+    radial-gradient(circle at 95% 98%,rgba(212,117,107,.04) 0,transparent 12%),
+    radial-gradient(circle at 50% 50%,rgba(123,143,168,.03) 0,transparent 30%);
+}
+:root[data-theme="night"] .topbar{background:rgba(26,28,34,.88)!important}
+:root[data-theme="night"] .sidebar-overlay{background:rgba(0,0,0,.50)}
+:root[data-theme="night"] ::-webkit-scrollbar-thumb{background:var(--paper-edge)}
+:root[data-theme="night"] .news-add-form.show{background:var(--bg-deep)}
+:root[data-theme="night"] .dictation-box{background:var(--bg-deep)}
+:root[data-theme="night"] .dictation-result.correct{background:rgba(125,160,136,.15);color:var(--jade)}
+:root[data-theme="night"] .dictation-result.wrong{background:rgba(212,117,107,.12);color:var(--vermilion)}
+.serif{font-family:Georgia,"Times New Roman","Songti SC",serif;font-weight:500;letter-spacing:.04em}
+.app{min-height:100vh}
+
+/* ===== 侧边栏 ===== */
 .sidebar{
-  width:var(--sidebar-w);
-  min-width:var(--sidebar-w);
-  background:var(--bg-deep);
-  border-right:1px solid var(--rule);
-  padding:32px 0 24px;
+  width:15%;min-width:240px;max-width:400px;
+  background:var(--bg-deep);border-right:1px solid var(--rule);
+  padding:28px 0 20px;
+  position:fixed;top:0;left:0;bottom:0;z-index:1000;
   display:flex;flex-direction:column;
-  position:relative;z-index:1000;
   background-image:
-    radial-gradient(circle at 20% 10%, rgba(176,138,78,.05) 0, transparent 30%),
-    radial-gradient(circle at 80% 90%, rgba(176,138,78,.06) 0, transparent 30%);
-  transition:transform .35s cubic-bezier(.4,0,.2,1);
-  overflow-y:auto;
+    radial-gradient(circle at 20% 10%,rgba(176,138,78,.05) 0,transparent 30%),
+    radial-gradient(circle at 80% 90%,rgba(74,127,181,.05) 0,transparent 30%);
+  transform:translateX(-100%);
+  transition:transform .42s cubic-bezier(.4,0,.2,1);
+  box-shadow:4px 0 24px rgba(90,70,40,.10);
 }
-
-/* 移动：抽屉式 */
-@media(max-width:860px){
-  .sidebar{
-    position:fixed;top:0;left:0;bottom:0;
-    transform:translateX(-100%);
-    box-shadow:4px 0 24px rgba(90,70,40,.15);
-    width:80vw;min-width:0;max-width:360px;
-  }
-  .sidebar.open{transform:translateX(0)}
-  .sidebar-overlay{
-    position:fixed;inset:0;
-    background:rgba(42,36,25,.35);
-    backdrop-filter:blur(2px);
-    z-index:990;
-    opacity:0;pointer-events:none;
-    transition:opacity .3s;
-  }
-  .sidebar-overlay.show{opacity:1;pointer-events:auto}
+.sidebar.open{transform:translateX(0)}
+.sidebar-overlay{
+  position:fixed;inset:0;background:rgba(42,36,25,.32);
+  backdrop-filter:blur(2px);z-index:900;
+  opacity:0;pointer-events:none;transition:opacity .35s;
 }
-
+.sidebar-overlay.show{opacity:1;pointer-events:auto}
 .sidebar-close{
-  position:absolute;top:16px;right:16px;
-  width:30px;height:30px;border-radius:50%;
-  background:transparent;border:1px solid var(--rule);
-  display:none;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--ink-soft);font-size:16px;
-  transition:all .25s;z-index:10;
+  position:absolute;top:14px;right:14px;width:44px;height:44px;
+  border-radius:50%;background:transparent;border:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--ink-soft);font-size:20px;transition:all .25s;z-index:10;
 }
-@media(max-width:860px){.sidebar-close{display:flex}}
-.sidebar-close:active{background:var(--gold-glow);border-color:var(--gold);color:var(--gold)}
-
+.sidebar-close:hover{background:var(--gold-glow);border-color:var(--gold);color:var(--gold);transform:rotate(90deg)}
 .sidebar-toggle{
-  display:none;
-  width:40px;height:40px;border-radius:50%;
-  background:var(--paper);border:1px solid var(--rule);
-  align-items:center;justify-content:center;
-  cursor:pointer;color:var(--ink-soft);flex-shrink:0;
-  transition:all .25s;
+  width:44px;height:44px;border-radius:50%;background:var(--paper);
+  border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--ink-soft);transition:all .25s;flex-shrink:0;
 }
-@media(max-width:860px){.sidebar-toggle{display:flex}}
-.sidebar-toggle:active{background:var(--gold-glow);border-color:var(--gold);color:var(--gold)}
+.sidebar-toggle:hover{background:var(--blue-glow);border-color:var(--blue);color:var(--blue)}
 .sidebar-toggle .bars{display:flex;flex-direction:column;gap:4px}
 .sidebar-toggle .bars span{display:block;width:18px;height:1.5px;background:currentColor;border-radius:1px}
-.sidebar-toggle.has-badge::after{
-  content:"";position:absolute;top:-1px;right:-1px;
-  width:8px;height:8px;border-radius:50%;
-  background:var(--vermilion);box-shadow:0 0 0 2px var(--bg);
-}
-
-.brand{padding:0 28px 28px;border-bottom:1px solid var(--rule)}
+.sidebar-toggle.active .bars span:nth-child(1){transform:translateY(5.5px) rotate(45deg)}
+.sidebar-toggle.active .bars span:nth-child(2){opacity:0}
+.sidebar-toggle.active .bars span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg)}
+.brand{padding:0 24px 22px;border-bottom:1px solid var(--rule)}
 .brand-mark{display:flex;align-items:center;gap:12px}
 .brand-seal{
   width:38px;height:38px;border-radius:50%;
-  background:var(--vermilion);
+  background:linear-gradient(135deg,var(--blue),var(--blue-light));
   display:flex;align-items:center;justify-content:center;
-  color:#FBF7EE;font-family:"Noto Serif SC",serif;font-weight:600;font-size:18px;
-  box-shadow:0 2px 6px rgba(184,74,56,.3);
+  color:#FBF7EE;font-family:Georgia,serif;font-weight:600;font-size:18px;
+  box-shadow:0 2px 6px rgba(74,127,181,.3);
 }
-.brand-name{font-family:"Noto Serif SC",serif;font-size:18px;font-weight:600;color:var(--ink);letter-spacing:.12em}
-.brand-sub{font-size:11px;color:var(--ink-faint);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
+.brand-text{display:flex;flex-direction:column;gap:2px}
+.brand-name{font-family:Georgia,serif;font-size:18px;font-weight:600;color:var(--ink);letter-spacing:.12em}
+.brand-sub{font-size:11px;color:var(--ink-faint);letter-spacing:.18em;text-transform:uppercase}
 
 .nav{margin-top:20px;flex:1;overflow-y:auto}
-.nav-section{padding:0 18px}
-.nav-label{font-size:10px;letter-spacing:.3em;color:var(--ink-faint);padding:14px 12px 10px;text-transform:uppercase}
+.nav-section{padding:0 14px}
+.nav-label{font-size:10px;letter-spacing:.3em;color:var(--ink-faint);padding:12px 10px 8px;text-transform:uppercase}
 .nav-item{
-  display:flex;align-items:center;gap:12px;
-  padding:10px 14px;margin-bottom:2px;
-  border-radius:8px;cursor:pointer;
-  color:var(--ink-soft);transition:all .2s;position:relative;
-  -webkit-tap-highlight-color:transparent;
-  user-select:none;
+  display:flex;align-items:center;gap:12px;padding:10px 12px;margin-bottom:2px;
+  border-radius:8px;cursor:pointer;color:var(--ink-soft);transition:all .25s;min-height:44px;
 }
 .nav-item:hover{background:rgba(176,138,78,.08);color:var(--ink)}
-.nav-item:active{background:rgba(176,138,78,.15)}
-.nav-item.active{background:rgba(176,138,78,.12);color:var(--ink);font-weight:500}
-.nav-item.active::before{content:"";position:absolute;left:-18px;top:8px;bottom:8px;width:2px;background:var(--gold)}
-.nav-icon{font-size:15px;width:22px;text-align:center}
-.nav-text{flex:1;font-size:14px;letter-spacing:.06em}
-.nav-kbd{
-  font-family:"Cormorant Garamond",serif;
-  font-size:10px;color:var(--ink-faint);
-  background:var(--bg);padding:1px 5px;border-radius:3px;border:1px solid var(--rule);
-  opacity:.6;
-}
-.nav-item.active .nav-kbd{color:var(--gold-soft);border-color:var(--gold-soft);opacity:1}
+.nav-item.active{background:var(--blue-glow);color:var(--blue);font-weight:600}
+.nav-item.active::before{content:"";position:absolute;left:-14px;top:10px;bottom:10px;width:2px;background:var(--blue)}
+.nav-icon{width:22px;text-align:center;font-size:15px;display:inline-flex;align-items:center;justify-content:center}
+.nav-text{flex:1;font-size:13px;letter-spacing:.06em}
+.nav-kbd{font-family:Georgia,serif;font-size:11px;color:var(--ink-faint);background:var(--bg);padding:2px 6px;border-radius:4px;border:1px solid var(--rule);opacity:.7}
 
-/* 同步区 */
-.sync-section{
-  margin-top:12px;padding:16px 18px 0;
-  border-top:1px dashed var(--rule);
+.sidebar-foot{padding:12px 24px;border-top:1px solid var(--rule);font-size:11px;color:var(--ink-faint);display:flex;flex-direction:column;gap:6px}
+.sidebar-foot-row{display:flex;justify-content:space-between;align-items:center}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--jade);margin-right:6px;box-shadow:0 0 0 0 rgba(92,122,90,.6);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(92,122,90,.5)}70%{box-shadow:0 0 0 6px rgba(92,122,90,0)}100%{box-shadow:0 0 0 0 rgba(92,122,90,0)}}
+.btn-sm{
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  padding:7px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid var(--rule);
+  background:var(--paper);color:var(--ink-soft);transition:all .15s;font-family:inherit;
 }
-.sync-label{font-size:10px;letter-spacing:.3em;color:var(--ink-faint);padding:0 12px 10px;text-transform:uppercase}
-.sync-btns{display:flex;gap:8px;padding:0 12px}
-.sync-btn{
-  flex:1;padding:8px 0;border:1px solid var(--rule);
-  border-radius:8px;background:transparent;
-  font-size:12px;color:var(--ink-soft);
-  cursor:pointer;letter-spacing:.08em;
-  transition:all .2s;font-family:inherit;
-  text-align:center;
-}
-.sync-btn:active{background:var(--gold-glow);border-color:var(--gold);color:var(--gold)}
-
-.sidebar-foot{
-  padding:16px 28px 0;border-top:1px solid var(--rule);
-  font-size:11px;color:var(--ink-faint);
-  display:flex;justify-content:space-between;align-items:center;
-}
-.live-dot{
-  display:inline-block;width:5px;height:5px;border-radius:50%;
-  background:var(--jade);margin-right:5px;
-  animation:pulse 2s infinite;
-}
-@keyframes pulse{
-  0%{box-shadow:0 0 0 0 rgba(92,122,90,.5)}
-  70%{box-shadow:0 0 0 5px rgba(92,122,90,0)}
-  to{box-shadow:0 0 0 0 rgba(92,122,90,0)}
-}
+.btn-sm:hover{background:var(--blue-glow);border-color:var(--blue);color:var(--blue)}
 
 /* ===== 主区 ===== */
-.main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:100vh}
-
+.main{min-height:100vh;display:flex;flex-direction:column}
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:20px 32px;
-  border-bottom:1px solid var(--rule);
-  background:var(--bg);gap:14px;
+  padding:14px 24px;border-bottom:1px solid var(--rule);
+  background:rgba(242,235,222,.85);backdrop-filter:blur(8px);
+  position:sticky;top:0;z-index:100;gap:14px;
 }
 .topbar-left{display:flex;align-items:center;gap:14px;min-width:0}
 .topbar-titles{min-width:0}
-.crumb{font-size:11px;color:var(--ink-faint);letter-spacing:.18em;margin-bottom:4px;text-transform:uppercase}
+.crumb{font-size:10px;color:var(--ink-faint);letter-spacing:.18em;margin-bottom:4px;text-transform:uppercase}
 .page-title{
-  font-family:"Noto Serif SC",serif;
-  font-size:22px;font-weight:500;
-  color:var(--ink);letter-spacing:.06em;
+  font-family:Georgia,serif;font-size:20px;font-weight:500;color:var(--ink);
+  letter-spacing:.06em;display:flex;align-items:baseline;gap:10px;
 }
-.page-title::before{
-  content:"";display:inline-block;width:4px;height:18px;
-  background:linear-gradient(180deg,var(--gold),var(--gold-soft));
-  margin-right:8px;border-radius:2px;vertical-align:middle;
-}
-.page-meta{font-size:12px;color:var(--ink-faint);font-family:"Cormorant Garamond",serif;letter-spacing:.12em}
+.page-title::before{content:"";display:inline-block;width:4px;height:18px;background:linear-gradient(180deg,var(--blue),var(--gold-soft));margin-right:6px;border-radius:2px}
+.page-meta{font-size:11px;color:var(--ink-faint);font-family:Georgia,serif;letter-spacing:.12em}
 
 .top-actions{display:flex;gap:10px;align-items:center}
 .btn-ghost{
-  background:transparent;border:1px solid var(--rule);
-  color:var(--ink-soft);padding:6px 14px;border-radius:20px;
-  font-size:12px;letter-spacing:.08em;cursor:pointer;
-  transition:all .2s;font-family:inherit;
-  white-space:nowrap;
+  background:transparent;border:1px solid var(--rule);color:var(--ink-soft);
+  padding:8px 14px;border-radius:20px;font-size:12px;letter-spacing:.06em;
+  cursor:pointer;transition:all .25s;font-family:inherit;min-height:44px;
+  display:inline-flex;align-items:center;gap:4px;
 }
-.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
-.btn-ghost:active{background:var(--gold-glow)}
-.btn-icon{
-  width:34px;height:34px;border-radius:50%;
-  background:var(--paper);border:1px solid var(--rule);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--ink-soft);font-size:16px;
-  transition:all .25s;
-}
-.btn-icon:active{background:var(--gold-glow);border-color:var(--gold);color:var(--gold)}
-.btn-icon.spin{animation:spin .8s linear}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-glow)}
+.btn-icon{width:44px;height:44px;border-radius:50%;background:var(--paper);border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);font-size:18px;transition:all .25s}
+.btn-icon:hover{background:var(--blue-glow);border-color:var(--blue);color:var(--blue);transform:rotate(180deg)}
+.btn-icon.spin{animation:spin 1s linear}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ===== 内容 ===== */
-.content{padding:28px 32px 48px;flex:1;overflow-y:auto}
-.container{max-width:800px;margin:0 auto}
+/* ===== 内容区 ===== */
+.content{padding:24px 24px 48px;flex:1;overflow-y:auto}
+.container{max-width:900px;margin:0 auto}
 
-/* ===== 卡片 ===== */
-.card{
-  background:var(--paper);
-  border:1px solid var(--paper-edge);
-  border-radius:var(--radius);
-  padding:24px 28px;margin-bottom:18px;
-  box-shadow:var(--shadow);
-}
-.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.card-title{
-  font-family:"Noto Serif SC",serif;
-  font-size:15px;font-weight:500;color:var(--ink);letter-spacing:.06em;
-  display:flex;align-items:center;gap:8px;
-}
-.card-title::before{content:"";display:inline-block;width:5px;height:5px;background:var(--vermilion);border-radius:50%}
-.card-tag{font-size:10px;letter-spacing:.18em;color:var(--ink-faint);padding:2px 10px;border:1px solid var(--rule);border-radius:10px;text-transform:uppercase}
+.card{background:var(--paper);border:1px solid var(--paper-edge);border-radius:12px;padding:22px 26px;margin-bottom:16px;box-shadow:var(--shadow);transition:all .3s}
+.card:hover{box-shadow:var(--shadow-hover)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-family:Georgia,serif;font-size:15px;font-weight:500;color:var(--ink);letter-spacing:.06em;display:flex;align-items:center;gap:8px}
+.card-title::before{content:"";display:inline-block;width:5px;height:5px;background:var(--gold);border-radius:50%}
+.card-tag{font-size:10px;letter-spacing:.18em;color:var(--ink-faint);padding:3px 8px;border:1px solid var(--rule);border-radius:10px;text-transform:uppercase}
 
-/* ===== 1. 晨间汇总 ===== */
-.morning-hero{
-  background:linear-gradient(135deg, #F8F2E4 0%, #EFE5D2 100%);
-  border-radius:18px;padding:36px 40px;margin-bottom:20px;
-  position:relative;overflow:hidden;
-  border:1px solid var(--paper-edge);
-}
-.morning-hero::before{
-  content:"朝";position:absolute;right:20px;top:12px;
-  font-family:"Noto Serif SC",serif;font-size:120px;
-  color:rgba(176,138,78,.07);font-weight:600;line-height:1;
-}
-.morning-date{
-  font-family:"Cormorant Garamond",serif;
-  font-size:12px;letter-spacing:.32em;color:var(--gold);
-  text-transform:uppercase;margin-bottom:12px;
-}
-.morning-greeting{
-  font-family:"Noto Serif SC",serif;
-  font-size:30px;font-weight:500;color:var(--ink);
-  letter-spacing:.06em;margin-bottom:6px;
-}
-.morning-poem{
-  font-family:"Noto Serif SC",serif;
-  font-size:13px;color:var(--ink-soft);letter-spacing:.1em;
-}
-.morning-stats{display:flex;gap:32px;margin-top:20px;padding-top:18px;border-top:1px solid rgba(176,138,78,.2);flex-wrap:wrap}
-.mstat-num{
-  font-family:"Cormorant Garamond",serif;
-  font-size:26px;font-weight:600;color:var(--ink);letter-spacing:.02em;
-}
-.mstat-lbl{font-size:10px;color:var(--ink-faint);letter-spacing:.18em;text-transform:uppercase;margin-top:3px}
+/* ===== 待办(模块1) ===== */
+.todo-input{display:flex;gap:10px;margin-bottom:16px}
+.todo-input input{flex:1;background:var(--paper);border:1px solid var(--paper-edge);padding:10px 16px;border-radius:22px;font-size:14px;color:var(--ink);outline:none;font-family:inherit;min-height:44px}
+.todo-input input::placeholder{color:var(--ink-faint)}
+.todo-input input:focus{border-color:var(--blue)}
+.todo-input button{background:var(--blue);color:var(--paper);border:none;padding:0 20px;border-radius:22px;cursor:pointer;font-size:13px;font-family:inherit;transition:opacity .2s;min-height:44px;white-space:nowrap}
+.todo-input button:hover{opacity:.85}
+.todo-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px dashed var(--rule);transition:opacity .3s;min-height:48px}
+.todo-row.done{opacity:.45}
+.todo-row.done .todo-text{text-decoration:line-through;color:var(--ink-faint)}
+.todo-check{width:24px;height:24px;border:2px solid var(--blue-light);border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .25s}
+.todo-row.done .todo-check{background:var(--blue);border-color:var(--blue)}
+.todo-row.done .todo-check::after{content:"✓";color:var(--paper);font-size:13px;font-weight:600}
+.todo-text{flex:1;font-size:14px;color:var(--ink)}
+.todo-meta{font-size:10px;color:var(--ink-faint);white-space:nowrap}
+.todo-del{background:transparent;border:none;cursor:pointer;color:var(--ink-faint);font-size:18px;opacity:0;transition:opacity .2s;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center}
+.todo-row:hover .todo-del{opacity:1}
+.todo-del:hover{color:var(--vermilion)}
+.todo-edit-btn{background:transparent;border:none;cursor:pointer;color:var(--ink-faint);font-size:14px;opacity:0;transition:opacity .2s;min-width:30px;min-height:30px;display:flex;align-items:center;justify-content:center}
+.todo-row:hover .todo-edit-btn{opacity:1}
+.todo-edit-btn:hover{color:var(--blue)}
+/* 记账编辑按钮 */
+.tx-edit-btn{background:transparent;border:none;cursor:pointer;color:var(--ink-faint);font-size:12px;opacity:0;min-width:24px;min-height:24px}
+.tx-row:hover .tx-edit-btn{opacity:1}
+.tx-edit-btn:hover{color:var(--blue)}
+/* 归档 */
+.archive-card{margin-top:12px}.archive-toggle{cursor:pointer;user-select:none}
+.archive-date-group{margin-bottom:10px}
+.archive-date-head{font-size:11px;color:var(--gold);font-weight:600;letter-spacing:.08em;padding:6px 0;border-bottom:1px dotted var(--rule)}
+/* 打卡日历条 */
+.checkin-bar{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.checkin-cell{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;border:1px solid var(--rule);background:var(--bg)}
+.checkin-cell.done{background:var(--jade);color:#fff;border-color:var(--jade)}
+.checkin-cell.today{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-glow)}
+.empty-tip{text-align:center;padding:40px 0;color:var(--ink-faint);font-family:Georgia,serif;font-size:13px}
+
+/* ===== 晨间汇总(模块2) ===== */
+.morning-hero{background:linear-gradient(135deg,#F8F4EA 0%,#E8DFD0 100%);border-radius:16px;padding:32px 36px;margin-bottom:20px;border:1px solid var(--paper-edge);position:relative;overflow:hidden}
+.morning-hero::before{content:"朝";position:absolute;right:20px;top:12px;font-family:Georgia,serif;font-size:120px;color:rgba(74,127,181,.06);font-weight:600;line-height:1}
+.morning-date{font-family:Georgia,serif;font-size:12px;letter-spacing:.28em;color:var(--blue);text-transform:uppercase;margin-bottom:10px}
+.morning-greeting{font-family:Georgia,serif;font-size:28px;font-weight:500;color:var(--ink);letter-spacing:.06em;margin-bottom:6px}
+.morning-poem{font-family:Georgia,serif;font-size:13px;color:var(--ink-soft);letter-spacing:.1em;font-style:italic}
+.morning-stats{display:flex;gap:28px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(176,138,78,.2);flex-wrap:wrap}
+.mstat-num{font-family:Georgia,serif;font-size:26px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.mstat-num.up{color:var(--vermilion)}.mstat-num.dn{color:var(--jade)}
+.mstat-num.blu{color:var(--blue)}
+.mstat-lbl{font-size:10px;color:var(--ink-faint);letter-spacing:.16em;text-transform:uppercase;margin-top:2px}
 
 .news-list{display:flex;flex-direction:column;gap:12px}
-.news-item{display:flex;gap:16px;padding:16px 0;border-bottom:1px dashed var(--rule)}
+.news-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px dashed var(--rule)}
 .news-item:last-child{border:none}
-.news-rank{font-family:"Cormorant Garamond",serif;font-size:28px;font-weight:500;color:var(--gold);line-height:1;min-width:36px}
+.news-rank{font-family:Georgia,serif;font-size:28px;font-weight:500;color:var(--gold);line-height:1;min-width:32px}
 .news-rank.top3{color:var(--vermilion)}
 .news-body{flex:1;min-width:0}
-.news-title{
-  font-family:"Noto Serif SC",serif;font-size:15px;font-weight:500;color:var(--ink);
-  text-decoration:none;letter-spacing:.04em;display:inline-block;margin-bottom:4px;
-}
-.news-summary{font-size:12px;color:var(--ink-soft);line-height:1.65}
-.news-meta{display:flex;gap:10px;margin-top:6px;font-size:10px;color:var(--ink-faint);letter-spacing:.08em;flex-wrap:wrap}
+.news-title{font-family:Georgia,serif;font-size:14px;font-weight:500;color:var(--ink);text-decoration:none;display:inline-block;margin-bottom:4px;transition:color .2s}
+a.news-title{color:var(--blue);cursor:pointer}a.news-title:hover{text-decoration:underline}
+.news-summary{font-size:12px;color:var(--ink-soft);line-height:1.6}
+.news-meta{display:flex;gap:10px;margin-top:6px;font-size:10px;color:var(--ink-faint);flex-wrap:wrap;align-items:center}
 .news-source{color:var(--gold)}
+.news-link{font-size:11px;font-weight:600;color:var(--blue);text-decoration:none;padding:2px 8px;border-radius:8px;background:var(--blue-glow);transition:all .15s;white-space:nowrap}
+.news-link:hover{background:var(--blue);color:#fff}
 
-/* ===== 2. 英语学习 ===== */
+/* 手动添加新闻表单 */
+.news-add-form{display:none;margin-top:12px;padding:14px 16px;background:var(--bg);border-radius:10px}
+.news-add-form.show{display:block}
+.news-add-form .r{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.news-add-form input{flex:1;min-width:120px;padding:8px 10px;border:1px solid var(--rule);border-radius:6px;font-size:13px;outline:none;font-family:inherit;background:var(--paper)}
+.news-add-form input:focus{border-color:var(--blue)}
+
+/* ===== 英语学习(模块3) ===== */
 .en-hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-.en-stat{
-  background:var(--paper);border:1px solid var(--paper-edge);
-  border-radius:var(--radius);padding:22px;text-align:center;box-shadow:var(--shadow);
+.en-stat{background:var(--paper);border:1px solid var(--paper-edge);border-radius:12px;padding:20px;text-align:center;box-shadow:var(--shadow)}
+.en-stat.duo{background:linear-gradient(135deg,var(--blue-glow),var(--paper))}
+.en-stat-num{font-family:Georgia,serif;font-size:42px;font-weight:600;color:var(--blue);line-height:1}
+.en-stat-num.unit{font-size:16px;color:var(--ink-faint);margin-left:4px}
+.en-stat-lbl{font-size:10px;color:var(--ink-faint);letter-spacing:.2em;margin-top:6px;text-transform:uppercase}
+.duolingo-link{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--blue);text-decoration:none;font-weight:600;padding:6px 14px;border-radius:16px;background:var(--blue-glow);transition:all .2s}
+.duolingo-link:hover{background:var(--blue);color:#fff}
+.duolingo-link svg{width:16px;height:16px}
+.en-res-link{
+  display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink-soft);
+  text-decoration:none;padding:4px 10px;border-radius:8px;background:var(--bg);
+  transition:all .2s;letter-spacing:.06em;border:1px solid var(--rule);
 }
-.en-stat-num{font-family:"Cormorant Garamond",serif;font-size:42px;font-weight:600;color:var(--gold);line-height:1}
-.en-stat-lbl{font-size:10px;color:var(--ink-faint);letter-spacing:.2em;margin-top:8px;text-transform:uppercase}
+.en-res-link:hover{background:var(--blue-glow);color:var(--blue);border-color:var(--blue)}
 
-.scene-card{
-  background:var(--paper);border:1px solid var(--paper-edge);
-  border-radius:var(--radius);padding:20px 24px;margin-bottom:14px;box-shadow:var(--shadow);
-}
-.scene-ctx{
-  display:inline-block;font-size:10px;letter-spacing:.18em;color:var(--gold);
-  background:var(--gold-glow);padding:2px 10px;border-radius:10px;margin-bottom:12px;
-}
-.dialogue{margin-bottom:12px}
-.d-line{display:flex;gap:12px;margin-bottom:6px;align-items:flex-start}
-.d-role{font-size:10px;color:var(--gold);letter-spacing:.12em;min-width:44px;font-weight:500;padding-top:3px}
-.d-text{font-size:14px;color:var(--ink);line-height:1.65}
-.d-hint{font-size:11px;color:var(--ink-faint);margin-top:2px;font-style:italic}
-
+.scene-card{background:var(--paper);border:1px solid var(--paper-edge);border-radius:12px;padding:20px 24px;margin-bottom:14px;box-shadow:var(--shadow)}
+.scene-ctx{display:inline-block;font-size:10px;letter-spacing:.16em;color:var(--blue);background:var(--blue-glow);padding:3px 10px;border-radius:10px;margin-bottom:12px;text-transform:uppercase}
+.dictation-box{border:2px dashed var(--blue-light);border-radius:10px;padding:16px 18px;margin:10px 0;background:var(--bg);min-height:44px}
+.dictation-input{width:100%;padding:10px 12px;font-size:15px;border:2px solid var(--blue-light);border-radius:8px;outline:none;font-family:inherit;background:var(--paper);min-height:44px}
+.dictation-input:focus{border-color:var(--blue)}
+.dictation-result{padding:10px 14px;border-radius:8px;font-size:12px;margin-top:8px}
+.dictation-result.correct{background:#E8F5E9;color:var(--jade)}
+.dictation-result.wrong{background:#FFF3F0;color:var(--vermilion)}
 .score-row{display:flex;gap:10px;align-items:center;padding-top:12px;border-top:1px dashed var(--rule)}
 .score-bar{flex:1;height:5px;background:var(--bg-deep);border-radius:3px;overflow:hidden}
-.score-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-soft));border-radius:3px;transition:width .5s}
-.score-num{font-family:"Cormorant Garamond",serif;font-size:16px;color:var(--gold);font-weight:600}
+.score-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold-soft));border-radius:3px;transition:width .6s}
+.score-num{font-family:Georgia,serif;font-size:16px;color:var(--blue);font-weight:600}
+.accent-radio{display:flex;gap:10px;margin-bottom:12px}
+.accent-radio label{font-size:12px;color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;gap:4px}
 
-/* ===== 3. 深度学习 ===== */
-.learn-card{
-  background:linear-gradient(135deg, var(--paper) 0%, #F5EDD9 100%);
-  border:1px solid var(--paper-edge);
-  border-radius:16px;padding:32px 36px;box-shadow:var(--shadow);
+/* ===== 深度学习(模块4) ===== */
+.learn-cycle{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;justify-content:center}
+.cycle-dot{padding:5px 12px;border-radius:12px;font-size:11px;color:var(--ink-faint);border:1px solid var(--rule);background:var(--paper);letter-spacing:.1em;cursor:pointer;transition:all .2s;min-height:36px;display:flex;align-items:center}
+.cycle-dot.active{background:var(--blue);color:var(--paper);border-color:var(--blue)}
+.learn-card{background:linear-gradient(135deg,var(--paper) 0%,#F2EFEA 100%);border:1px solid var(--paper-edge);border-radius:14px;padding:28px 32px;box-shadow:var(--shadow)}
+.learn-domain{display:inline-block;font-family:Georgia,serif;font-size:12px;letter-spacing:.16em;color:var(--blue);background:var(--blue-glow);padding:4px 12px;border-radius:12px;margin-bottom:14px}
+.learn-theory{font-family:Georgia,serif;font-size:19px;font-weight:500;color:var(--ink);line-height:1.5;margin-bottom:16px;padding-left:16px;border-left:3px solid var(--blue)}
+.learn-case-label{font-size:10px;letter-spacing:.2em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:6px}
+.learn-case{font-size:13px;color:var(--ink-soft);line-height:1.8;margin-bottom:16px;padding:12px 16px;background:rgba(255,255,255,.6);border-radius:8px;border:1px solid var(--paper-edge)}
+.learn-q{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--ink);padding:14px 18px;background:var(--blue-glow);border-radius:8px;border-left:3px solid var(--blue);margin-bottom:8px}
+.learn-q::before{content:"问：";color:var(--blue);font-weight:600;margin-right:4px}
+.learn-answer{margin-top:8px;padding:12px 16px;background:#F5F0E8;border-radius:8px;border-left:3px solid var(--gold);font-size:12px;color:var(--ink-soft);line-height:1.7;display:none}
+.learn-answer.open{display:block}
+.learn-answer::before{content:"答：";color:var(--gold);font-weight:600;margin-right:4px}
+.wx-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--jade);text-decoration:none;padding:5px 12px;border-radius:10px;background:rgba(125,160,136,.1);transition:all .2s;min-height:36px}
+.wx-link:hover{background:var(--jade);color:#fff}
+.wx-sogou{border:1px solid var(--jade)}
+/* 精选公众号列表 */
+.accounts-block{margin-top:14px;padding:14px 16px;background:var(--bg);border-radius:10px;border:1px dashed var(--rule)}
+.accounts-title{font-size:11px;color:var(--ink-faint);margin-bottom:10px;letter-spacing:.08em;font-weight:600}
+.accounts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.account-chip{
+  display:flex;flex-direction:column;gap:3px;padding:8px 12px;
+  background:var(--paper);border:1px solid var(--rule);border-radius:8px;
+  text-decoration:none;transition:all .2s;min-height:44px;
 }
-.learn-domain{
-  display:inline-block;font-family:"Noto Serif SC",serif;
-  font-size:12px;letter-spacing:.18em;color:var(--vermilion);
-  background:rgba(184,74,56,.08);padding:3px 12px;border-radius:12px;margin-bottom:16px;
-}
-.learn-theory{
-  font-family:"Noto Serif SC",serif;font-size:20px;font-weight:500;
-  color:var(--ink);line-height:1.5;letter-spacing:.04em;margin-bottom:18px;
-  padding-left:16px;border-left:3px solid var(--gold);
-}
-.learn-case-label{font-size:10px;letter-spacing:.24em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:6px}
-.learn-case{
-  font-size:13px;color:var(--ink-soft);line-height:1.8;margin-bottom:18px;
-  padding:12px 16px;background:rgba(255,255,255,.5);
-  border-radius:8px;border:1px solid var(--paper-edge);
-}
-.learn-q{
-  font-family:"Noto Serif SC",serif;
-  font-size:15px;color:var(--ink);
-  padding:14px 18px;background:rgba(176,138,78,.06);
-  border-radius:8px;border-left:3px solid var(--vermilion);letter-spacing:.04em;
-}
-.learn-q::before{content:"问：";color:var(--vermilion);font-weight:600;margin-right:4px}
+.account-chip:hover{border-color:var(--jade);background:rgba(125,160,136,.1);transform:translateY(-1px)}
+.account-name{font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.04em}
+.account-tag{font-size:10px;color:var(--jade);letter-spacing:.04em}
+.accounts-tip{font-size:10px;color:var(--ink-faint);margin-top:10px;text-align:center;letter-spacing:.06em}
 
-.learn-cycle{display:flex;gap:6px;margin-bottom:18px;justify-content:center;flex-wrap:wrap}
-.cycle-dot{
-  padding:5px 12px;border-radius:12px;font-size:11px;color:var(--ink-faint);
-  border:1px solid var(--rule);background:var(--paper);letter-spacing:.1em;cursor:pointer;
-  transition:all .2s;
-}
-.cycle-dot:active{background:var(--gold-glow)}
-.cycle-dot.active{background:var(--gold);color:var(--paper);border-color:var(--gold)}
-
-/* ===== 4. 财务 ===== */
-.fin-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
-.fin-card{
-  background:var(--paper);border:1px solid var(--paper-edge);
-  border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);
-}
-.fin-lbl{font-size:10px;letter-spacing:.24em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:8px}
-.fin-num{font-family:"Cormorant Garamond",serif;font-size:26px;font-weight:600;color:var(--ink);line-height:1.1}
-.fin-num.up{color:var(--vermilion)}
-.fin-num.dn{color:var(--jade)}
-.fin-sub{font-size:10px;color:var(--ink-faint);margin-top:5px;letter-spacing:.1em}
-
-.budget-bar{height:6px;background:var(--bg-deep);border-radius:3px;overflow:hidden;margin-top:12px}
-.budget-fill{height:100%;background:linear-gradient(90deg,var(--jade),var(--gold));border-radius:3px;transition:width .6s}
-.budget-warn .budget-fill{background:linear-gradient(90deg,var(--gold),var(--vermilion))}
-
-.fund-row{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px dashed var(--rule)}
-.fund-name{font-family:"Noto Serif SC",serif;font-size:13px;color:var(--ink);font-weight:500}
-.fund-code{font-size:10px;color:var(--ink-faint);margin-left:6px}
-.fund-info{display:flex;flex-direction:column}
-.fund-sub{font-size:10px;color:var(--ink-faint);margin-top:3px;letter-spacing:.08em}
-.fund-val{font-family:"Cormorant Garamond",serif;font-size:18px;font-weight:600}
-.fund-val.up{color:var(--vermilion)}
-.fund-val.dn{color:var(--jade)}
-
-.tx-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px dashed var(--rule)}
+/* ===== 财务记账(模块5) ===== */
+.fin-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px}
+.fin-card{background:var(--paper);border:1px solid var(--paper-edge);border-radius:12px;padding:18px 22px;box-shadow:var(--shadow)}
+.fin-card.blu{border-left:3px solid var(--blue)}
+.fin-lbl{font-size:10px;letter-spacing:.2em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:6px}
+.fin-num{font-family:Georgia,serif;font-size:28px;font-weight:600;color:var(--ink);line-height:1.1}
+.fin-num.pos{color:var(--vermilion)}.fin-num.neg{color:var(--jade)}.fin-num.blu{color:var(--blue)}
+.fin-sub{font-size:10px;color:var(--ink-faint);margin-top:4px;letter-spacing:.08em}
+.budget-bar{height:7px;background:var(--bg-deep);border-radius:4px;overflow:hidden;margin-top:10px}
+.budget-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));border-radius:4px;transition:width .8s}
+.tx-list{display:flex;flex-direction:column}
+.tx-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px dashed var(--rule)}
 .tx-info{display:flex;align-items:center;gap:12px}
-.tx-cat{
-  width:32px;height:32px;border-radius:50%;background:var(--gold-glow);color:var(--gold);
-  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;
-}
-.tx-name{font-size:13px;color:var(--ink)}
-.tx-date{font-size:10px;color:var(--ink-faint);margin-top:1px}
-.tx-amt{font-family:"Cormorant Garamond",serif;font-size:16px;font-weight:600}
-.tx-amt.in{color:var(--vermilion)}
-.tx-amt.out{color:var(--ink-soft)}
+.tx-cat{width:34px;height:34px;border-radius:50%;background:var(--blue-glow);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.tx-name{font-size:13px;color:var(--ink)}.tx-date{font-size:10px;color:var(--ink-faint);margin-top:1px}
+.tx-amt{font-family:Georgia,serif;font-size:17px;font-weight:600}.tx-amt.in{color:var(--vermilion)}.tx-amt.out{color:var(--ink-soft)}
+.fund-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px dashed var(--rule)}
+.fund-name{font-family:Georgia,serif;font-size:13px;color:var(--ink);font-weight:500}.fund-code{font-size:10px;color:var(--ink-faint);margin-left:6px}
+.fund-est{font-family:Georgia,serif;font-size:18px;font-weight:600}.fund-est.up{color:var(--vermilion)}.fund-est.dn{color:var(--jade)}
+.fund-summary-row{display:flex;justify-content:space-between;padding:10px 0 14px;gap:8px;flex-wrap:wrap}
+.fund-summary-row>div{flex:1;min-width:90px}
+.fund-img{display:inline-block;margin:6px 6px 0 0;border-radius:8px;border:1px solid var(--rule);max-width:200px;max-height:280px;object-fit:cover;cursor:zoom-in;transition:transform .2s}
+.fund-img:hover{transform:scale(2.5);z-index:10;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+.quick-form{display:grid;grid-template-columns:60px 1fr 100px 80px;gap:8px;align-items:center}
+.quick-form input,.quick-form select{padding:8px 10px;font-size:14px;border:1px solid var(--rule);border-radius:6px;outline:none;font-family:inherit;background:var(--paper);min-height:44px}
+.quick-form input:focus{border-color:var(--blue)}
 
-/* ===== 5. 收藏 ===== */
-.collect-item{padding:16px 0;border-bottom:1px dashed var(--rule)}
-.collect-cat{display:inline-block;font-size:10px;letter-spacing:.16em;padding:2px 8px;border-radius:8px;margin-bottom:6px}
+/* ===== 内容沉淀(模块6) ===== */
+.collect-item{padding:14px 0;border-bottom:1px dashed var(--rule)}
+.collect-title{font-family:Georgia,serif;font-size:14px;color:var(--ink);font-weight:500;margin:4px 0 6px;letter-spacing:.04em}
+.collect-ai{font-size:12px;color:var(--ink-soft);line-height:1.75;padding-left:10px;border-left:2px solid var(--gold-soft)}
+.collect-ai::before{content:"▸ ";color:var(--gold-soft)}
+.collect-meta{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:10px;color:var(--ink-faint);flex-wrap:wrap}
+.douyin-btn{
+  display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;
+  color:var(--vermilion);text-decoration:none;padding:2px 8px;border-radius:8px;
+  background:rgba(184,74,56,.1);transition:all .15s;
+}
+.douyin-btn:hover{background:var(--vermilion);color:#fff}
+.collect-cat{display:inline-block;font-size:10px;letter-spacing:.14em;padding:2px 8px;border-radius:8px;text-transform:uppercase}
 .collect-cat.idea{background:rgba(176,138,78,.12);color:var(--gold)}
-.collect-cat.skill{background:rgba(92,122,90,.15);color:var(--jade)}
+.collect-cat.skill{background:var(--blue-glow);color:var(--blue)}
 .collect-cat.fun{background:rgba(184,74,56,.12);color:var(--vermilion)}
-.collect-title{font-family:"Noto Serif SC",serif;font-size:14px;color:var(--ink);font-weight:500;margin:4px 0 6px;letter-spacing:.04em}
-.collect-ai{font-size:12px;color:var(--ink-soft);line-height:1.7;padding-left:10px;border-left:2px solid var(--gold-soft)}
-.collect-date{font-size:10px;color:var(--ink-faint);letter-spacing:.1em;margin-top:6px}
 
-/* ===== 6. 阅读 ===== */
-.book-current{
-  display:flex;gap:20px;align-items:center;
-  background:linear-gradient(135deg, var(--paper) 0%, #F5EDD9 100%);
-  border:1px solid var(--paper-edge);
-  border-radius:16px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:18px;
-}
-.book-cover{
-  width:56px;height:78px;background:linear-gradient(180deg,var(--vermilion),#8B3527);
-  border-radius:3px;display:flex;align-items:center;justify-content:center;
-  font-family:"Noto Serif SC",serif;color:var(--paper);
-  font-size:20px;font-weight:600;writing-mode:vertical-rl;letter-spacing:.14em;
-  box-shadow:0 3px 10px rgba(184,74,56,.3);flex-shrink:0;
-}
-.book-info{flex:1;min-width:0}
-.book-title{font-family:"Noto Serif SC",serif;font-size:18px;color:var(--ink);margin-bottom:2px;font-weight:500}
-.book-author{font-size:11px;color:var(--ink-faint);letter-spacing:.1em;margin-bottom:12px}
-.book-progress{display:flex;align-items:center;gap:12px}
-.book-bar{flex:1;height:5px;background:var(--bg-deep);border-radius:3px;overflow:hidden}
-.book-fill{height:100%;background:linear-gradient(90deg,var(--gold-soft),var(--gold));border-radius:3px}
-.book-pct{font-family:"Cormorant Garamond",serif;font-size:13px;color:var(--gold);font-weight:600}
-.book-note{
-  font-size:12px;color:var(--ink-soft);line-height:1.7;margin-top:10px;
-  padding:8px 12px;background:rgba(255,255,255,.5);border-radius:6px;
-}
+/* 微信读书结构化笔记 */
+.wn-chapter{margin-bottom:10px;border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.wn-chapter-head{padding:10px 14px;background:var(--bg);font-size:12px;font-weight:600;color:var(--ink);cursor:pointer;letter-spacing:.04em;display:flex;justify-content:space-between;align-items:center;min-height:40px}
+.wn-chapter-head:hover{background:var(--blue-glow)}
+.wn-body{padding:8px 14px 12px}
+.wn-quote{padding:8px 12px;margin:4px 0;font-size:12px;color:var(--ink-soft);line-height:1.7;border-left:3px solid var(--gold-soft);background:var(--bg);border-radius:0 6px 6px 0}
+.wn-thought{padding:6px 12px;margin:2px 0 8px;font-size:11px;color:var(--blue);font-style:italic;background:var(--blue-glow);border-radius:6px}
 
-.quote-card{
-  background:var(--paper);border:1px solid var(--paper-edge);
-  border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);margin-bottom:12px;position:relative;
-}
-.quote-card::before{
-  content:"「";position:absolute;left:12px;top:4px;
-  font-family:"Noto Serif SC",serif;font-size:32px;color:var(--gold-soft);opacity:.4;line-height:1;
-}
-.quote-body{font-family:"Noto Serif SC",serif;font-size:15px;color:var(--ink);letter-spacing:.06em;line-height:1.75;padding-left:22px}
-.quote-src{text-align:right;font-size:10px;color:var(--ink-faint);letter-spacing:.16em;margin-top:8px}
+/* ===== 阅读管理(模块7) ===== */
+.book-current{display:flex;gap:20px;align-items:center;background:linear-gradient(135deg,var(--paper) 0%,#F2EFEA 100%);border:1px solid var(--paper-edge);border-radius:14px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:16px}
+.book-cover{width:60px;height:84px;background:linear-gradient(180deg,var(--blue),#2C5F8A);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;color:var(--paper);font-size:22px;font-weight:600;writing-mode:vertical-rl;letter-spacing:.14em;box-shadow:0 4px 12px rgba(74,127,181,.3);flex-shrink:0}
+.book-info{flex:1}.book-title{font-family:Georgia,serif;font-size:18px;color:var(--ink);margin-bottom:2px;font-weight:500}.book-author{font-size:11px;color:var(--ink-faint);letter-spacing:.1em;margin-bottom:10px}
+.book-progress{display:flex;align-items:center;gap:10px}.book-bar{flex:1;height:5px;background:var(--bg-deep);border-radius:3px;overflow:hidden}.book-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));border-radius:3px}.book-pct{font-family:Georgia,serif;font-size:13px;color:var(--blue);font-weight:600}
+.weread-btn{background:rgba(125,160,136,.12);border-color:var(--jade);color:var(--jade);font-size:11px;padding:6px 12px;min-height:36px}
+.weread-btn:hover{background:var(--jade);color:#fff;border-color:var(--jade)}
+/* 书籍选择器 */
+.book-selector{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.book-chip{padding:6px 12px;border-radius:16px;font-size:12px;cursor:pointer;border:1px solid var(--rule);background:var(--paper);color:var(--ink-soft);transition:all .2s;font-family:inherit;min-height:36px}
+.book-chip.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.book-chip.add{border-style:dashed;color:var(--gold);font-weight:600}
+.book-chip:hover:not(.active){border-color:var(--blue);color:var(--blue)}
+/* 古诗词 */
+.poetry-card{background:linear-gradient(135deg,var(--paper) 0%,#F5F0E8 100%)!important}
+.poetry-block{text-align:center;padding:16px 0}
+.poetry-text{font-family:Georgia,"Times New Roman","Songti SC",serif;font-size:18px;color:var(--ink);line-height:2.2;letter-spacing:.06em}
+.poetry-src{font-family:Georgia,serif;font-size:12px;color:var(--gold);margin-top:12px;letter-spacing:.14em}
+.quote-card{background:var(--paper);border:1px solid var(--paper-edge);border-radius:12px;padding:18px 22px;margin-bottom:10px;position:relative}
+.quote-body{font-family:Georgia,serif;font-size:14px;color:var(--ink);font-style:italic;letter-spacing:.04em;line-height:1.7;padding-left:20px}
+.quote-src{text-align:right;font-size:10px;color:var(--ink-faint);letter-spacing:.14em;margin-top:8px}
 
-/* ===== 7. 诗词 ===== */
-.poem-card{
-  background:var(--paper);border:1px solid var(--paper-edge);
-  border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);margin-bottom:12px;
-}
-.poem-text{font-family:"Noto Serif SC",serif;font-size:16px;color:var(--ink);letter-spacing:.06em;line-height:1.9}
-.poem-src{text-align:right;font-size:10px;color:var(--ink-faint);letter-spacing:.16em;margin-top:10px}
-.poem-ctx{font-size:10px;color:var(--gold);letter-spacing:.18em;margin-bottom:6px;display:inline-block;background:var(--gold-glow);padding:2px 8px;border-radius:8px}
-
-/* ===== 8. 待办 ===== */
-.todo-input{display:flex;gap:8px;margin-bottom:18px}
-.todo-input input{
-  flex:1;background:var(--paper);border:1px solid var(--paper-edge);
-  padding:10px 16px;border-radius:22px;font-size:13px;color:var(--ink);
-  outline:none;font-family:inherit;letter-spacing:.04em;
-}
-.todo-input input:focus{border-color:var(--gold-soft)}
-.todo-input button{
-  background:var(--gold);color:var(--paper);border:none;
-  padding:0 20px;border-radius:22px;cursor:pointer;
-  font-size:12px;letter-spacing:.1em;font-family:inherit;
-  transition:opacity .2s;white-space:nowrap;
-}
-.todo-input button:active{opacity:.8}
-
-.todo-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px dashed var(--rule)}
-.todo-row.done{opacity:.4}
-.todo-row.done .todo-text{text-decoration:line-through}
-.todo-check{
-  width:20px;height:20px;border:1.5px solid var(--rule);
-  border-radius:50%;cursor:pointer;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;transition:all .2s;
-}
-.todo-row.done .todo-check{background:var(--jade);border-color:var(--jade)}
-.todo-row.done .todo-check::after{content:"✓";color:var(--paper);font-size:10px;font-weight:600}
-.todo-text{flex:1;font-size:13px;color:var(--ink);letter-spacing:.04em;word-break:break-all}
-.todo-meta{font-size:10px;color:var(--ink-faint);letter-spacing:.1em;white-space:nowrap}
-.todo-del{background:transparent;border:none;cursor:pointer;color:var(--ink-faint);font-size:16px;opacity:0;transition:opacity .15s;padding:4px}
-.todo-row:hover .todo-del,.todo-row:active .todo-del{opacity:1}
-
-/* ===== 导入/导出弹窗 ===== */
-.modal{
-  position:fixed;inset:0;z-index:2000;
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity .3s;
-}
-.modal.show{opacity:1;pointer-events:auto}
-.modal-bg{position:absolute;inset:0;background:rgba(42,36,25,.45);backdrop-filter:blur(3px)}
-.modal-box{
-  position:relative;background:var(--paper);
-  border-radius:18px;padding:32px 36px;
-  max-width:540px;width:90vw;box-shadow:0 20px 60px rgba(90,70,40,.2);
-  z-index:1;
-}
-.modal-title{font-family:"Noto Serif SC",serif;font-size:18px;font-weight:500;margin-bottom:6px;color:var(--ink)}
-.modal-desc{font-size:12px;color:var(--ink-faint);margin-bottom:20px;letter-spacing:.06em}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
-
-/* ===== 通用 ===== */
-.text-input{
-  width:100%;background:var(--paper);border:1px solid var(--paper-edge);
-  padding:10px 14px;border-radius:8px;font-size:13px;color:var(--ink);
-  outline:none;font-family:inherit;
-}
-.text-input:focus{border-color:var(--gold-soft)}
+/* 通用输入 */
+.text-input{width:100%;background:var(--paper);border:1px solid var(--paper-edge);padding:8px 12px;border-radius:6px;font-size:14px;color:var(--ink);outline:none;font-family:inherit;min-height:44px}
+.text-input:focus{border-color:var(--blue)}
 textarea.text-input{resize:vertical;min-height:60px}
 
-.empty-tip{
-  text-align:center;padding:48px 0;color:var(--ink-faint);
-  font-family:"Noto Serif SC",serif;font-size:13px;letter-spacing:.14em;
-}
-.empty-tip::before{content:"·";display:block;font-size:28px;color:var(--gold-soft);margin-bottom:6px}
+.foot-strip{padding:14px 24px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-size:10px;color:var(--ink-faint);letter-spacing:.14em;background:var(--bg)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--gold-soft)}
 
-.foot-strip{
-  padding:16px 32px;border-top:1px solid var(--rule);
-  display:flex;justify-content:space-between;
-  font-size:10px;color:var(--ink-faint);
-  letter-spacing:.16em;background:var(--bg);
-  flex-wrap:wrap;gap:8px;
+/* ===== 响应式 ===== */
+@media (max-width:767px){
+  .sidebar{width:15%;min-width:220px}
+  .topbar{padding:12px 16px}
+  .page-title{font-size:17px}
+  .content{padding:16px 16px 40px}
+  .card{padding:16px 18px}
+  .card-title{font-size:14px}
+  .morning-hero{padding:22px 18px}
+  .morning-greeting{font-size:22px}
+  .morning-stats{gap:16px}
+  .en-hero{grid-template-columns:1fr}
+  .fin-summary{grid-template-columns:1fr}
+  .quick-form{grid-template-columns:1fr 1fr;gap:6px}
+  .learn-card{padding:20px 18px}
+  .book-current{flex-direction:column;align-items:flex-start}
 }
-
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px}
 </style>
-</head>
+
+<script>
+(function(){
+  try{
+    var beacon=new BeaconAction({
+      appkey:'0WEB06U85YBSLJNL',
+      versionCode:'1.0.0',
+      channelID:'share',
+      delay:1000,
+      sessionDuration:30*60*1000,
+      isOversea:false,
+      needReportRqdEvent:false
+    });
+    beacon.onDirectUserAction('preview_page_view',{
+      'url':location.href,
+      'referrer':document.referrer,
+      'title':document.title,
+      'sandbox_id':'7244833b33464403abb702c798d968ad'
+    });
+  }catch(e){}
+})();
+</script></head>
 <body>
 <div class="app">
-  <div class="sidebar-overlay" id="overlay"></div>
-
-  <!-- 侧边栏 -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-close" id="sidebarClose">×</div>
+    <div class="sidebar-close" id="sidebarClose">&times;</div>
     <div class="brand">
       <div class="brand-mark">
         <div class="brand-seal">洛</div>
-        <div>
+        <div class="brand-text">
           <div class="brand-name">Loran</div>
           <div class="brand-sub">Daily Bench</div>
         </div>
@@ -564,671 +505,1210 @@ textarea.text-input{resize:vertical;min-height:60px}
     </div>
     <nav class="nav">
       <div class="nav-section">
+        <div class="nav-label">事 务</div>
+        <div class="nav-item active" data-page="todo"><span class="nav-icon">行</span><span class="nav-text">待办管理</span><span class="nav-kbd">1</span></div>
+      </div>
+      <div class="nav-section">
         <div class="nav-label">日 常</div>
-        <div class="nav-item active" data-page="morning"><span class="nav-icon">晨</span><span class="nav-text">晨间汇总</span><span class="nav-kbd">1</span></div>
-        <div class="nav-item" data-page="english"><span class="nav-icon">英</span><span class="nav-text">英语学习</span><span class="nav-kbd">2</span></div>
-        <div class="nav-item" data-page="finance"><span class="nav-icon">账</span><span class="nav-text">财务记账</span><span class="nav-kbd">3</span></div>
+        <div class="nav-item" data-page="morning"><span class="nav-icon">晨</span><span class="nav-text">晨间汇总</span><span class="nav-kbd">2</span></div>
+        <div class="nav-item" data-page="english"><span class="nav-icon">英</span><span class="nav-text">英语学习</span><span class="nav-kbd">3</span></div>
+        <div class="nav-item" data-page="finance"><span class="nav-icon">账</span><span class="nav-text">财务记账</span><span class="nav-kbd">5</span></div>
       </div>
       <div class="nav-section">
         <div class="nav-label">修 养</div>
         <div class="nav-item" data-page="learn"><span class="nav-icon">学</span><span class="nav-text">深度学习</span><span class="nav-kbd">4</span></div>
-        <div class="nav-item" data-page="read"><span class="nav-icon">阅</span><span class="nav-text">阅读管理</span><span class="nav-kbd">5</span></div>
-        <div class="nav-item" data-page="poems"><span class="nav-icon">诗</span><span class="nav-text">诗词摘录</span><span class="nav-kbd">6</span></div>
-        <div class="nav-item" data-page="collect"><span class="nav-icon">藏</span><span class="nav-text">内容沉淀</span><span class="nav-kbd">7</span></div>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">事 务</div>
-        <div class="nav-item" data-page="todo"><span class="nav-icon">行</span><span class="nav-text">待办管理</span><span class="nav-kbd">8</span></div>
+        <div class="nav-item" data-page="collect"><span class="nav-icon">藏</span><span class="nav-text">内容沉淀</span><span class="nav-kbd">6</span></div>
+        <div class="nav-item" data-page="read"><span class="nav-icon">阅</span><span class="nav-text">阅读管理</span><span class="nav-kbd">7</span></div>
       </div>
     </nav>
-    <!-- 同步区 -->
-    <div class="sync-section">
-      <div class="sync-label">数据同步</div>
-      <div class="sync-btns">
-        <button class="sync-btn" onclick="showExport()">📤 导出</button>
-        <button class="sync-btn" onclick="showImport()">📥 导入</button>
-      </div>
-    </div>
     <div class="sidebar-foot">
-      <span><span class="live-dot"></span>数据连通</span>
-      <span id="liveClock">--:--</span>
+      <div class="sidebar-foot-row"><span><span class="live-dot"></span>数据连通</span><span id="liveClock">--:--</span></div>
+      <div class="sidebar-foot-row">
+        <button class="btn-sm" id="btnSyncOut" title="复制数据到剪贴板，在另一台设备粘贴恢复">📤 同步出去</button>
+        <button class="btn-sm" id="btnSyncIn" title="从剪贴板恢复数据">📥 同步进来</button>
+      </div>
+      <div class="sidebar-foot-row">
+        <button class="btn-sm" id="btnExport">导出JSON</button>
+        <button class="btn-sm" id="btnImport">导入恢复</button>
+      </div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v4.5 · 微信直连 · 基金实时 · 政经双频</div>
     </div>
   </aside>
 
-  <!-- 主区 -->
   <main class="main">
     <header class="topbar">
       <div class="topbar-left">
-        <button class="sidebar-toggle has-badge" id="sidebarToggle" title="菜单">
+        <button class="sidebar-toggle" id="sidebarToggle" title="菜单 (M)">
           <div class="bars"><span></span><span></span><span></span></div>
         </button>
         <div class="topbar-titles">
-          <div class="crumb">L O R A N · D A I L Y &nbsp; B E N C H</div>
-          <h1 class="page-title" id="pageTitle">晨间汇总</h1>
-          <div class="page-meta" id="pageMeta">—— 寅时既明，万物初醒</div>
+          <div class="crumb">L O R A N &nbsp;·&nbsp; D A I L Y &nbsp; B E N C H</div>
+          <h1 class="page-title" id="pageTitle">待办管理</h1>
+          <div class="page-meta" id="pageMeta">—— 日拱一卒，功不唐捐</div>
         </div>
       </div>
       <div class="top-actions">
-        <button class="btn-ghost" onclick="showExport()" title="导出数据">📤 同步</button>
+        <span class="btn-ghost" id="statusBadge">● 实时</span>
+        <button class="btn-icon" id="themeBtn" title="切换主题">
+          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
         <button class="btn-icon" id="refreshBtn" title="刷新">↻</button>
       </div>
     </header>
-
     <div class="content"><div class="container" id="contentArea"></div></div>
-
     <div class="foot-strip">
-      <span>按 1-8 切换模块 · 数据本地持久化</span>
-      <span>© Loran · 工作台 v4</span>
+      <span>按 1-7 切换模块 · 数据本地持久化</span>
+      <span>&copy; Loran · 工作台 v4.3</span>
     </div>
   </main>
 </div>
 
-<!-- 导出弹窗 -->
-<div class="modal" id="exportModal">
-  <div class="modal-bg" onclick="closeExport()"></div>
-  <div class="modal-box">
-    <div class="modal-title">导出全部数据</div>
-    <div class="modal-desc">复制以下密钥文本，在另一台设备上"导入"即可同步所有数据</div>
-    <textarea class="text-input" id="exportData" readonly style="min-height:100px;font-family:monospace;font-size:11px;word-break:break-all" onclick="this.select()">LORAN:...</textarea>
-    <div class="modal-actions">
-      <button class="btn-ghost" onclick="copyExport()" style="background:var(--gold);color:var(--paper);border:none;padding:8px 20px">📋 复制到剪贴板</button>
-      <button class="btn-ghost" onclick="closeExport()">关闭</button>
-    </div>
-  </div>
-</div>
-
-<!-- 导入弹窗 -->
-<div class="modal" id="importModal">
-  <div class="modal-bg" onclick="closeImport()"></div>
-  <div class="modal-box">
-    <div class="modal-title">导入数据</div>
-    <div class="modal-desc">粘贴从其他设备导出的 LORAN 密钥文本</div>
-    <textarea class="text-input" id="importData" placeholder="LORAN:eyJ0b2RvcyI6W3si..." style="min-height:120px;font-family:monospace;font-size:11px"></textarea>
-    <div class="modal-actions">
-      <button class="btn-ghost" onclick="doImport()" style="background:var(--gold);color:var(--paper);border:none;padding:8px 20px">✓ 确认导入</button>
-      <button class="btn-ghost" onclick="closeImport()">取消</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+<input type="file" id="imgInput" accept="image/*" style="display:none" multiple />
 
 <script>
-/* ============ 工具 ============ */
-const $ = (s,r=document)=>r.querySelector(s);
-const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
-const ls = {
+/* ===== 工具 ===== */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const ls={
   get:(k,d)=>{try{const v=localStorage.getItem('loran_'+k);return v?JSON.parse(v):d}catch(e){return d}},
   set:(k,v)=>{try{localStorage.setItem('loran_'+k,JSON.stringify(v))}catch(e){}}
 };
-const today = ()=>{
-  const d=new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-};
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const formatTime=()=>{const d=new Date();return `${String(d.getMonth()+1).padStart(2,'0')}月${String(d.getDate()).padStart(2,'0')}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
+function safeHref(url){if(!url)return'#';const u=String(url).trim();if(/^https?:\/\//i.test(u)||/^douyin:\/\//i.test(u))return u;if(/^\/\//i.test(u))return'https:'+u;return'#';}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
-/* Toast */
-let _toastTimer;
-function toast(msg,type=''){
-  const el=$('#toast');el.textContent=msg;el.className='toast show '+type;
-  clearTimeout(_toastTimer);
-  _toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
-}
-
-/* 剪贴板 */
-async function copyText(txt){
-  try{await navigator.clipboard.writeText(txt);toast('已复制到剪贴板 ✓','ok')}
-  catch(e){
-    const ta=document.createElement('textarea');ta.value=txt;
-    document.body.appendChild(ta);ta.select();
-    document.execCommand('copy');document.body.removeChild(ta);
-    toast('已复制 ✓','ok');
-  }
-}
-
-/* ============ 默认数据 ============ */
-const DEFAULT = {
-  jokes:['我觉得我挺会节约的。比如昨天我吃饭的时候，把昨天的剩饭吃了。','同事问我："你怎么每天都这么开心？" 我说："因为我不知道明天会更惨。"','今天在电梯里放了个屁，结果所有人都看着我。我就知道，一个人的气质是藏不住的。'],
-  todos:[{id:'t1',text:'整理本周深度学习笔记',done:false,created:'2026-08-06'}],
-  news:[],
+/* ===== 默认数据 ===== */
+const DEFAULT_DATA={
+  todos:[
+    {id:'t1',text:'整理本周深度学习笔记',done:false,created:today()},
+    {id:'t2',text:'基金定投确认扣款',done:false,created:today()},
+    {id:'t3',text:'阅读《置身事内》30 页',done:false,created:today()}
+  ],
+  news:[
+    {id:'n1',title:'央行发布二季度货币政策执行报告',summary:'强调保持流动性合理充裕，加大金融对实体经济支持力度',source:'央行官网',link:'http://www.pbc.gov.cn/',category:'finance',time:'09:30'},
+    {id:'n2',title:'A股三大指数集体收涨，两市成交额突破万亿',summary:'沪指涨0.72%，市场情绪回暖',source:'证券时报',link:'http://www.stcn.com/',category:'finance',time:'11:00'},
+    {id:'n3',title:'国务院部署稳经济一揽子增量政策',summary:'消费、投资、出口领域推出新措施',source:'新华社',link:'http://www.news.cn/',category:'politics',time:'08:15'},
+    {id:'n4',title:'美联储官员：通胀回落趋势令人鼓舞',summary:'未来加息或更加谨慎',source:'财联社',link:'https://www.cls.cn/',category:'finance',time:'07:00'},
+    {id:'n5',title:'中美经贸高层通话保持沟通渠道畅通',summary:'双方就共同关心的经贸问题交换意见',source:'商务部',link:'http://www.mofcom.gov.cn/',category:'politics',time:'10:00'}
+  ],
   english:[
-    {ctx:'BBC Learning English',audio:'Welcome to BBC Learning English. Today we look at the language of travel.',transcript:'Welcome to BBC Learning English. Today we look at the language of travel.',hint:'BBC快速英语·旅行话题',score:0,userAnswer:''},
-    {ctx:'每日英语听力·生活英语',audio:'Let me show you how to order coffee in a real American cafe.',transcript:'Let me show you how to order coffee in a real American cafe.',hint:'生活英语·咖啡厅点单',score:0,userAnswer:''},
-    {ctx:'每日英语听力·商务英语',audio:'I would like to discuss the quarterly report with you.',transcript:'I would like to discuss the quarterly report with you.',hint:'商务英语·季度报告',score:0,userAnswer:''}
+    {ctx:'BBC Learning English',audio:'Welcome to BBC Learning English. Today we look at the language of travel.',audioUrl:'',transcript:'Welcome to BBC Learning English. Today we look at the language of travel.',hint:'BBC慢速英语·旅行话题',link:'https://www.bbc.co.uk/learningenglish/english/features/6-minute-english',linkLabel:'BBC 6 Minute English',score:0,userAnswer:''},
+    {ctx:'每日英语听力·生活英语',audio:'Let me show you how to order coffee in a real American cafe.',audioUrl:'',transcript:'Let me show you how to order coffee in a real American cafe.',hint:'生活英语·咖啡点单',link:'https://dict.eudic.net/ting',linkLabel:'每日英语听力',score:0,userAnswer:''},
+    {ctx:'每日英语听力·商务英语',audio:'I would like to discuss the quarterly report with you.',audioUrl:'',transcript:'I would like to discuss the quarterly report with you.',hint:'商务英语·季度报告',link:'https://learnenglish.britishcouncil.org/skills/speaking',linkLabel:'British Council 口语',score:0,userAnswer:''}
   ],
   englishCheckedDate:'',
   englishStreak:0,
   englishAccent:'en-US',
   funds:[
-    {code:'501300',name:'南方纳斯达克100指数(QDII)A',amount:980.38,gain:-9.9,daily:30.71},
-    {code:'011614',name:'中证中证科创创业50指数C',amount:424.96,gain:-75.11,daily:10.7},
-    {code:'015787',name:'国泰上证科创板50成份ETF联接C',amount:370.8,gain:-29.24,daily:15.44},
-    {code:'014806',name:'晨星互联网数字经济精选混合A',amount:282.85,gain:2.85,daily:5.09},
+    {code:'501300',name:'南方纳斯达克100指数(QDII)A',amount:980.38,gain:-9.90,daily:30.71},
+    {code:'011614',name:'中欧中证科创创业50指数C',amount:424.96,gain:-75.11,daily:10.70},
+    {code:'015787',name:'国泰上证科创板50成份ETF联接C',amount:370.80,gain:-29.24,daily:15.44},
+    {code:'014806',name:'易方达趋势优选混合A',amount:282.85,gain:2.85,daily:5.09},
+    {code:'161036',name:'富国中证工业有色金属ETF联接C',amount:109.54,gain:9.54,daily:5.25},
+    {code:'110020',name:'易方达沪深300ETF联接C',amount:96.99,gain:-3.01,daily:1.12},
+    {code:'159570',name:'汇添富港股通创新药ETF联接C',amount:49.52,gain:-0.48,daily:0.53},
+    {code:'012900',name:'中欧中证机器人指数发起C',amount:46.39,gain:-5.27,daily:1.15},
+    {code:'012414',name:'招商中证白酒指数C',amount:3.85,gain:0.19,daily:-0.05}
   ],
   fundImages:[],
   books:[
-    {title:'置身事内',author:'兰小欢',current:184,total:392,readingNotes:'第一章核心观点：经济增长不是市场自发产生的，而是政府组织的结果。财政体制中"事权下放、财权上收"是关键命题。'},
-    {title:'论语',author:'孔子',current:3,total:13,readingNotes:'第一则"学而篇"读完，共学之道以孝为先，层层推及。'},
+    {title:'置身事内',author:'兰小欢',current:184,total:392,wereadUrl:'weread://',
+      readingNotes:'第一章核心观点：经济增长离不开政府组织。财政体制中"事权下放、财权上收"是关键矛盾。'},
+    {title:'诗三百',author:'历代选篇',current:12,total:0,wereadUrl:'',
+      readingNotes:'晨读唐诗宋词，养浩然之气。今日重读杜甫《春望》，字字沉郁顿挫。'},
+    {title:'孙子兵法',author:'孙武',current:3,total:13,wereadUrl:'',
+      readingNotes:'第一篇"始计篇"读完，兵法之道以算为先，庙算多者胜。'}
   ],
   readingIndex:0,
   poems:[
     {t:'国破山河在，城春草木深。感时花溅泪，恨别鸟惊心。',s:'杜甫 · 春望',ctx:'家国感怀'},
-    {t:'但愿人长久，千里共婵娟。',s:'苏轼 · 水调歌头',ctx:'中秋思乡'},
+    {t:'但愿人长久，千里共婵娟。',s:'苏轼 · 水调歌头',ctx:'中秋寄思'},
     {t:'空山新雨后，天气晚来秋。明月松间照，清泉石上流。',s:'王维 · 山居秋暝',ctx:'山水清音'},
     {t:'大漠孤烟直，长河落日圆。',s:'王维 · 使至塞上',ctx:'边塞壮阔'},
     {t:'采菊东篱下，悠然见南山。',s:'陶渊明 · 饮酒',ctx:'出世闲适'},
-    {t:'海内存知己，天涯若比邻。',s:'王勃 · 送杜少府之任蜀州',ctx:'友情送别'},
+    {t:'海内存知己，天涯若比邻。',s:'王勃 · 送杜少府之任蜀州',ctx:'友情送别'}
   ],
   learnIndex:0,
+  learnDomains:['政治','金融','人力资源管理'],
   collect:[
-    {kind:'idea',kindLabel:'灵感库',title:'一条关于穿搭的收藏',summary:'▸ 3步搭定一周穿搭：上衣配色+2下装配色+1外套，能搭出21套。\n▸ 联想：可整理自己的衣橱单品，建立搭配公式。',url:'https://v.douyin.com/iRqDemo001/',date:'2026-08-04'},
-    {kind:'skill',kindLabel:'技能教程',title:'一份实用技能：Python自动化',summary:'▸ Python 自动化报表模板：用 openpyxl 批量处理表格每天省1小时。\n▸ 联想：与工作中重复性任务结合，可形成自己的脚本库。',url:'https://v.douyin.com/iRqDemo003/',date:'2026-08-05'},
+    {kind:'idea',kindLabel:'灵感库',title:'一条关于穿搭的收藏',summary:'▸ 3分钟搞定一周穿搭：胶囊衣橱公式3上衣+2下装+1外套，能搭出21套。\n▸ 联想：可整理自己的衣橱单品建立搭配矩阵。',url:'https://v.douyin.com/iRqDemo001/',date:'2026-08-04'},
+    {kind:'skill',kindLabel:'技能教程',title:'一份实用技巧：Python自动化',summary:'▸ Python 自动化报表模板：用 openpyxl 批量填表每天省1小时。\n▸ 联想：与工作中重复性任务对照，可形成自己的脚本库。',url:'https://v.douyin.com/iRqDemo003/',date:'2026-08-05'}
   ],
   finance:{budget:2000,spent:300},
   transactions:[
-    {id:'tx1',cat:'食',name:'早餐·咖啡与面包',amt:32,out:true,date:'2026-08-06',receipt:''},
-    {id:'tx2',cat:'行',name:'地铁通勤',amt:18,out:true,date:'2026-08-06',receipt:''},
-    {id:'tx3',cat:'书',name:'购书《置身事内》',amt:56,out:true,date:'2026-08-06',receipt:''},
+    {id:'tx1',cat:'食',name:'早餐·咖啡与面包',amt:32,out:true,date:today(),receipt:''},
+    {id:'tx2',cat:'行',name:'地铁通勤',amt:18,out:true,date:today(),receipt:''},
+    {id:'tx3',cat:'书',name:'购书《置身事内》',amt:56,out:true,date:today(),receipt:''}
   ]
 };
 
-/* ============ 数据层 ============ */
+const LEARN_DB={
+  '政治':[
+    {theory:'三权分立与制衡 — 立法、行政、司法相互制约的设计哲学',case:'美国国会可推翻总统否决，最高法可判法律违宪，形成了世界上最早的现代分权实践。',q:'如果一国行政权力过度膨胀，你认为哪些制衡机制会最先失效？',answer:'司法独立性和媒体自由度通常首当其冲，因为行政部门可通过预算控制和信息管控削弱这两大支柱。',
+     accounts:[{name:'人民日报',tag:'权威·政策',sogou:'rmrbwx'},{name:'侠客岛',tag:'时政·评论',sogou:'xiake_island'},{name:'政事堂',tag:'政经',sogou:'politics01'},{name:'凤凰网评论',tag:'观点·深度',sogou:'ifengpinglun'}]},
+    {theory:'政治周期理论 — 选举周期影响政策制定的时间偏好',case:'在选举年前夕，政府倾向于推出短期刺激政策以提升民意支持率，而在选举后则更可能推行结构改革。',q:'为什么基础设施投资通常在新政府上任第一年启动？',answer:'因为大型基建项目见效慢(3-5年)，第一年启动可在下一届选举前完工，最大化政治收益。',
+     accounts:[{name:'政事堂',tag:'政经',sogou:'politics01'},{name:'FT中文网',tag:'政经·观察',sogou:'FTChinese'},{name:'政见CNPolitics',tag:'学术·深度',sogou:'cnpolitics'}]}
+  ],
+  '金融':[
+    {theory:'复利效应 — 第七个馒头的智慧：财富增长的非线性加速',case:'每月定投5000元年化8%，20年后约280万，本金投入仅120万。',q:'为什么大多数人无法坚持长期定投？',answer:'复利的早期回报微乎其微——前5年增长极慢，人类大脑天生偏好即时奖赏，忍耐延迟满足需要极强的纪律性。',
+     accounts:[{name:'远川研究所',tag:'深度·宏观',sogou:'yuancailuohu'},{name:'36氪',tag:'创投·前沿',sogou:'wow36kr'},{name:'虎嗅',tag:'商业·观察',sogou:'huxiu_com'},{name:'银行螺丝钉',tag:'基金定投',sogou:'indexfund'},{name:'格隆汇',tag:'港股·投资',sogou:'gelonghui'}]},
+    {theory:'市场有效性与行为金融 — 市场并非完全理性',case:'2008年金融危机中，评级机构对MBS给出AAA评级，市场集体忽视了尾部风险。',q:'个人投资者如何利用行为偏差获利？',answer:'在市场恐慌时逆势买入优质资产，等待理性回归。但这需要强大的心理承受力和足够的闲置资金。',
+     accounts:[{name:'雪球',tag:'投资者社区',sogou:'xueqiujinghua'},{name:'集思录',tag:'套利·数据',sogou:'jisilu'},{name:'债券圈',tag:'债券·固收',sogou:'zqcaijing'}]}
+  ],
+  '人力资源管理':[
+    {theory:'双因素理论 — 保健因素消除不满，激励因素产生满意',case:'涨薪只能短暂缓解不满（保健因素），真正驱动绩效的是成就感、认可与成长空间（激励因素）。',q:'远程办公时代，HR如何设计激励因素？',answer:'核心是把"控制"转为"赋能"：明确目标而非监控过程、定期双向反馈、提供学习预算、用异步沟通代替会议。',
+     accounts:[{name:'哈佛商业评论',tag:'管理·前沿',sogou:'hbrchinese'},{name:'领英LinkedIn',tag:'职场·洞察',sogou:'LinkedIn-China'},{name:'中欧国际工商学院',tag:'商学院·思享',sogou:'CEIBSOfficial'},{name:'混沌大学',tag:'创新·认知',sogou:'hundun-university'}]},
+    {theory:'OKR vs KPI — 目标管理工具的选择',case:'Google用OKR驱动创新，传统工厂用KPI管控效率。OKR设定挑战性目标，容许多元路径；KPI关心确定性产出。',q:'销售团队应该用KPI还是OKR？',answer:'短期结果导向(月度销售额)用KPI保持纪律，长期策略(开拓新市场、客户满意度)用OKR激发创新。两者可以并行。',
+     accounts:[{name:'稻盛和夫',tag:'经营哲学',sogou:'daoshenghefu'},{name:'明源云',tag:'地产管理',sogou:'mingyuandichan'}]}
+  ]
+};
+
+/* ===== 数据层 ===== */
 let data={};
 function loadData(){
   data={
-    jokes:ls.get('jokes',DEFAULT.jokes),
-    news:ls.get('news',DEFAULT.news),
-    todos:ls.get('todos',DEFAULT.todos),
-    english:ls.get('english',DEFAULT.english),
-    englishCheckedDate:ls.get('englishCheckedDate',''),
-    englishStreak:ls.get('englishStreak',0),
-    englishAccent:ls.get('englishAccent','en-US'),
-    funds:ls.get('funds',DEFAULT.funds),
-    fundImages:ls.get('fundImages',[]),
-    books:ls.get('books',DEFAULT.books),
-    readingIndex:ls.get('readingIndex',0),
-    poems:ls.get('poems',DEFAULT.poems),
-    learnIndex:ls.get('learnIndex',DEFAULT.learnIndex),
-    collect:ls.get('collect',DEFAULT.collect),
-    finance:ls.get('finance',DEFAULT.finance),
-    transactions:ls.get('transactions',DEFAULT.transactions),
+    todos:ls.get('todos',DEFAULT_DATA.todos),
+    news:ls.get('news',DEFAULT_DATA.news),
+    english:ls.get('english',DEFAULT_DATA.english),
+    englishCheckedDate:ls.get('englishCheckedDate',DEFAULT_DATA.englishCheckedDate),
+    englishStreak:ls.get('englishStreak',DEFAULT_DATA.englishStreak),
+    englishAccent:ls.get('englishAccent',DEFAULT_DATA.englishAccent),
+    funds:ls.get('funds',DEFAULT_DATA.funds),
+    fundImages:ls.get('fundImages',DEFAULT_DATA.fundImages),
+    books:ls.get('books',DEFAULT_DATA.books),
+    readingIndex:ls.get('readingIndex',DEFAULT_DATA.readingIndex),
+    poems:ls.get('poems',DEFAULT_DATA.poems),
+    learnIndex:ls.get('learnIndex',DEFAULT_DATA.learnIndex),
+    collect:ls.get('collect',DEFAULT_DATA.collect),
+    finance:ls.get('finance',DEFAULT_DATA.finance),
+    transactions:ls.get('transactions',DEFAULT_DATA.transactions)
   };
 }
-
-function saveData(){
-  Object.keys(data).forEach(k=>{
-    if(k==='englishCheckedDate'||typeof data[k]==='string')ls.set(k,data[k]);
-    else ls.set(k,data[k]);
-  });
+function saveAll(){
+  ls.set('todos',data.todos); ls.set('news',data.news);
+  ls.set('english',data.english); ls.set('englishCheckedDate',data.englishCheckedDate);
+  ls.set('englishStreak',data.englishStreak); ls.set('englishAccent',data.englishAccent);
+  ls.set('funds',data.funds); ls.set('fundImages',data.fundImages);
+  ls.set('books',data.books); ls.set('readingIndex',data.readingIndex); ls.set('poems',data.poems); ls.set('learnIndex',data.learnIndex);
+  ls.set('collect',data.collect); ls.set('finance',data.finance);
+  ls.set('transactions',data.transactions);
 }
 
-/* ============ 导入/导出 ============ */
-function showExport(){
-  const payload = {};
-  Object.keys(data).forEach(k=>{payload[k]=data[k]});
-  const b64 = btoa(encodeURIComponent(JSON.stringify(payload)));
-  $('#exportData').value = 'LORAN:'+b64;
-  $('#exportModal').classList.add('show');
-  setTimeout(()=>$('#exportData').select(),200);
-}
-function closeExport(){$('#exportModal').classList.remove('show')}
-async function copyExport(){
-  await copyText($('#exportData').value);
-  closeExport();
-}
-
-function showImport(){$('#importModal').classList.add('show')}
-function closeImport(){$('#importModal').classList.remove('show')}
-
-function doImport(){
-  const raw = $('#importData').value.trim();
-  if(!raw){toast('请粘贴 LORAN 数据','warn');return}
-  let b64 = raw;
-  if(raw.startsWith('LORAN:'))b64=raw.slice(6);
-  try{
-    const json = JSON.parse(decodeURIComponent(atob(b64)));
-    if(typeof json!=='object'||!json.todos){toast('数据格式无效','warn');return}
-    // 合并导入
-    Object.keys(json).forEach(k=>{
-      if(DEFAULT.hasOwnProperty(k)){data[k]=json[k];ls.set(k,json[k])}
-    });
-    toast('数据导入成功 ✓ 刷新中...','ok');
-    closeImport();
-    setTimeout(()=>go(curPage),500);
-  }catch(e){
-    toast('解析失败，请检查数据完整性','warn');
-  }
-}
-
-/* ============ 路由 ============ */
-const PAGE_META = {
+const PAGE_META={
+  todo:{t:'待办管理',m:'—— 日拱一卒，功不唐捐'},
   morning:{t:'晨间汇总',m:'—— 寅时既明，万物初醒'},
   english:{t:'英语学习',m:'—— A little each day, the words will stay'},
   learn:{t:'深度学习',m:'—— 学而时习之，不亦说乎'},
   finance:{t:'财务记账',m:'—— 量入为出，积少成多'},
   collect:{t:'内容沉淀',m:'—— 厚积薄发，聚沙成塔'},
-  read:{t:'阅读管理',m:'—— 开卷有益，温故知新'},
-  poems:{t:'诗词摘录',m:'—— 腹有诗书气自华'},
-  todo:{t:'待办管理',m:'—— 日拱一卒，功不唐捐'}
+  read:{t:'阅读管理',m:'—— 开卷有益，温故知新'}
 };
-const PAGES = {morning:rMorning,english:rEnglish,learn:rLearn,finance:rFinance,collect:rCollect,read:rRead,poems:rPoems,todo:rTodo};
-let curPage='morning';
-
+const PAGES={todo:renderTodo,morning:renderMorning,english:renderEnglish,learn:renderLearn,finance:renderFinance,collect:renderCollect,read:renderRead};
+let curPage='todo';
 function go(p){
-  if(!PAGES[p])return;
-  curPage=p;
+  if(!PAGES[p])return;curPage=p;
   $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===p));
-  const m=PAGE_META[p];
-  $('#pageTitle').textContent=m.t;
-  $('#pageMeta').textContent=m.m;
+  const meta=PAGE_META[p];
+  $('#pageTitle').textContent=meta.t;$('#pageMeta').textContent=meta.m;
   PAGES[p]();
 }
 
-/* ============ 1. 晨间汇总 ============ */
-function rMorning(){
-  const joke=data.jokes[Math.floor(Math.random()*data.jokes.length)];
-  const todos=data.todos.filter(t=>!t.done).slice(0,3);
-  const news=data.news.slice(0,6);
-  const poem = data.poems[Math.floor(Math.random()*data.poems.length)]||DEFAULT.poems[0];
+/* ===== 1. 待办管理 ===== */
+function renderTodo(){
+  const todos=data.todos;const pending=todos.filter(t=>!t.done);const done=todos.filter(t=>t.done);
+  // 按完成日期分组
+  const doneByDate={};
+  done.forEach(t=>{const d=t.checkedAt||t.created||'未知';if(!doneByDate[d])doneByDate[d]=[];doneByDate[d].push(t)});
+  const doneDates=Object.keys(doneByDate).sort().reverse();
+  $('#contentArea').innerHTML=`
+    <div class="card">
+      <div class="card-header"><div class="card-title">待办总览</div><span class="card-tag">${pending.length} / ${todos.length}</span></div>
+      <div class="todo-input">
+        <input id="todoInput" placeholder="添加一件待办…" onkeydown="if(event.key==='Enter')addTodo()" />
+        <button onclick="addTodo()">＋ 录入</button>
+      </div>
+    </div>
+    ${todos.length?`
+      <div class="card">
+        ${todos.map(t=>`
+          <div class="todo-row ${t.done?'done':''}" id="todo-${t.id}">
+            <div class="todo-check" onclick="toggleTodo('${t.id}')"></div>
+            <div class="todo-text" ondblclick="editTodo('${t.id}')" title="双击编辑">${escHtml(t.text)}</div>
+            <div class="todo-meta">${t.created||'今天'}</div>
+            <button class="todo-edit-btn" onclick="editTodo('${t.id}')" title="编辑">✎</button>
+            <button class="todo-del" onclick="delTodo('${t.id}')">&times;</button>
+          </div>
+        `).join('')}
+      </div>
+    `:'<div class="card"><div class="empty-tip">心如明镜，一无所欠</div></div>'}
+    ${done.length?`
+    <div class="card archive-card">
+      <div class="card-header archive-toggle" onclick="toggleArchive()">
+        <div class="card-title">已完成归档</div>
+        <span class="card-tag" id="archiveCount">${done.length} 项 ▼</span>
+      </div>
+      <div class="archive-body" id="archiveBody" style="display:none">
+        ${doneDates.map(date=>`
+          <div class="archive-date-group">
+            <div class="archive-date-head">${date} · ${doneByDate[date].length} 项</div>
+            ${doneByDate[date].map(t=>`
+              <div class="todo-row done">
+                <div class="todo-check" onclick="toggleTodo('${t.id}')"></div>
+                <div class="todo-text">${escHtml(t.text)}</div>
+                <div class="todo-meta">✓ ${t.checkedAt||''}</div>
+              </div>
+            `).join('')}
+          </div>
+        `).join('')}
+      </div>
+    </div>`:''}
+  `;
+}
+function toggleArchive(){
+  const body=$('#archiveBody');const tag=$('#archiveCount');
+  if(body.style.display==='none'){body.style.display='block';tag.textContent=tag.textContent.replace('▼','▲')}
+  else{body.style.display='none';tag.textContent=tag.textContent.replace('▲','▼')}
+}
+function addTodo(){const txt=$('#todoInput').value.trim();if(!txt)return;data.todos.unshift({id:Date.now().toString(),text:txt,done:false,created:today()});saveAll();renderTodo()}
+function editTodo(id){
+  const t=data.todos.find(x=>x.id===id);if(!t)return;
+  const newText=prompt('修改待办内容',t.text);
+  if(newText!==null&&newText.trim()){t.text=newText.trim();saveAll();renderTodo()}
+}
+function toggleTodo(id){const t=data.todos.find(x=>x.id===id);if(!t)return;t.done=!t.done;if(t.done)t.checkedAt=today();saveAll();renderTodo()}
+function delTodo(id){data.todos=data.todos.filter(x=>x.id!==id);saveAll();renderTodo()}
 
+/* ===== 2. 晨间汇总 ===== */
+function renderMorning(){
+  const news=data.news.slice(0,6);
+  const pending=data.todos.filter(t=>!t.done).length;
+  $('#statusBadge').textContent=news.length?'● 实时':'○ 缓存';
   $('#contentArea').innerHTML=`
     <div class="morning-hero">
       <div class="morning-date">${today()} · MORNING</div>
       <div class="morning-greeting">早安，今日依旧</div>
-      <div class="morning-poem">"${(poem.t||'').slice(0,30)}..."</div>
+      <div class="morning-poem">"醒也无聊，醉也无聊，花底春风第几宵。"</div>
       <div class="morning-stats">
-        <div class="mstat"><div class="mstat-num">${data.englishStreak||0}</div><div class="mstat-lbl">英语打卡</div></div>
-        <div class="mstat"><div class="mstat-num">${news.length}</div><div class="mstat-lbl">头条</div></div>
-        <div class="mstat"><div class="mstat-num">${todos.length}</div><div class="mstat-lbl">待办</div></div>
-        <div class="mstat"><div class="mstat-num">${data.funds.length||0}</div><div class="mstat-lbl">基金</div></div>
+        <div class="mstat"><div class="mstat-num up">+0.32%</div><div class="mstat-lbl">Sense Index</div></div>
+        <div class="mstat"><div class="mstat-num blu">${news.length}</div><div class="mstat-lbl">Headlines</div></div>
+        <div class="mstat"><div class="mstat-num dn">${pending}</div><div class="mstat-lbl">Pending</div></div>
+        <div class="mstat"><div class="mstat-num blu">★</div><div class="mstat-lbl">Mood</div></div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-header"><div class="card-title">今日冷知识/笑话</div><span class="card-tag">Fun</span></div>
-      <p style="font-family:'Noto Serif SC',serif;font-size:16px;color:var(--ink);line-height:1.8;padding-left:16px;border-left:3px solid var(--vermilion)">${joke}</p>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><div class="card-title">实时头条</div><span class="card-tag">${news.length?'Live':'Offline'}</span></div>
-      <div class="news-list">
+      <div class="card-header">
+        <div class="card-title">实时头条</div>
+        <span class="card-tag">${news.length?'Live':'Offline'}</span>
+      </div>
+      <button class="btn-ghost" style="margin-bottom:10px" onclick="toggleNewsForm()">＋ 手动添加新闻</button>
+      <div class="news-add-form" id="newsAddForm">
+        <div class="r"><input id="nTitle" placeholder="新闻标题" /><input id="nSource" placeholder="来源" style="max-width:120px" /></div>
+        <div class="r"><input id="nSummary" placeholder="一句话摘要" /><input id="nLink" placeholder="原文链接" /></div>
+        <button class="btn-ghost" onclick="addNewsManually()">保存新闻</button>
+      </div>
+      <div class="news-list" id="newsList">
         ${news.length?news.map((n,i)=>`
           <div class="news-item">
             <div class="news-rank ${i<3?'top3':''}">${String(i+1).padStart(2,'0')}</div>
             <div class="news-body">
-              <a class="news-title" href="${n.link}" target="_blank">${n.title}</a>
-              <div class="news-summary">${n.summary}</div>
-              <div class="news-meta"><span class="news-source">${n.source}</span><span>·</span><span>${n.time||'刚刚'}</span></div>
+              ${safeHref(n.link)!=='#'?`<a class="news-title" href="${escHtml(safeHref(n.link))}" target="_blank" rel="noopener">${escHtml(n.title)}</a>`:`<span class="news-title">${escHtml(n.title)}</span>`}
+              <div class="news-summary">${escHtml(n.summary)}</div>
+              <div class="news-meta">
+                <span class="news-source">${escHtml(n.source)}</span><span>·</span><span>${n.time||'刚刚'}</span>
+                ${n.category?`<span style="font-size:9px;background:${n.category==='politics'?'#F0E6FF':'#D8E6F3'};color:${n.category==='politics'?'#805AD5':'#4A7FB5'};padding:1px 6px;border-radius:8px">${n.category==='politics'?'政经':'财经'}</span>`:''}
+                ${safeHref(n.link)!=='#'?`<a class="news-link" href="${escHtml(safeHref(n.link))}" target="_blank" rel="noopener noreferrer">查看原文 ↗</a>`:''}
+              </div>
             </div>
           </div>
-        `).join(''):'<div class="empty-tip">点击右上角 ↻ 拉取最新要闻</div>'}
+        `).join(''):'<div class="empty-tip">点击右上角 ↻ 拉取最新要闻，或手动添加</div>'}
       </div>
     </div>
 
     <div class="card">
-      <div class="card-header"><div class="card-title">今日待办</div><span class="card-tag">${todos.length} 项</span></div>
-      ${todos.length?todos.map(t=>`
-        <div class="todo-row"><div class="todo-check" onclick="qtTodo('${t.id}')"></div><div class="todo-text">${t.text}</div><div class="todo-meta">${t.created===today()?'今日':'积累'}</div></div>
-      `).join('')+'<button class="btn-ghost" style="margin-top:12px" onclick="go(\'todo\')">查看全部 →</button>':'<div class="empty-tip">今日无待办，心境澄明</div>'}
+      <div class="card-header"><div class="card-title">今日待办速览</div><span class="card-tag">${pending} 项</span></div>
+      ${pending?data.todos.filter(t=>!t.done).slice(0,3).map(t=>`
+        <div class="todo-row"><div class="todo-check" onclick="quickToggleTodo('${t.id}')"></div><div class="todo-text">${escHtml(t.text)}</div><div class="todo-meta">${t.created===today()?'今日':'积累'}</div></div>
+      `).join('')+'<button class="btn-ghost" style="margin-top:10px" onclick="go(\'todo\')">查看全部待办 →</button>':'<div class="empty-tip">今日无待办</div>'}
     </div>
   `;
 }
-function qtTodo(id){
-  const t=data.todos.find(x=>x.id===id);if(!t)return;
-  t.done=!t.done;saveData();if(curPage==='morning')rMorning();
+function quickToggleTodo(id){const t=data.todos.find(x=>x.id===id);if(!t)return;t.done=!t.done;if(t.done)t.checkedAt=today();saveAll();renderMorning()}
+function toggleNewsForm(){document.getElementById('newsAddForm').classList.toggle('show')}
+function addNewsManually(){
+  const title=$('#nTitle').value.trim(),source=$('#nSource').value.trim(),summary=$('#nSummary').value.trim(),link=$('#nLink').value.trim();
+  if(!title){alert('请填写标题');return}
+  data.news.unshift({id:'n'+Date.now(),title,summary:summary||title,source:source||'手动添加',link,time:formatTime()});
+  saveAll();renderMorning();
+  $('#nTitle').value='';$('#nSource').value='';$('#nSummary').value='';$('#nLink').value='';
 }
 
-/* ============ 2. 英语学习 ============ */
-function rEnglish(){
-  const streak = data.englishStreak||0;
-  const checkinToday = data.englishCheckedDate===today();
+/* ===== 3. 英语学习(听写模式) ===== */
+function renderEnglish(){
+  const streak=data.englishStreak||0;
+  const checkedToday=data.englishCheckedDate===today();
+  const accent=data.englishAccent||'en-US';
 
   $('#contentArea').innerHTML=`
     <div class="en-hero">
-      <div class="en-stat"><div class="en-stat-num">${streak}</div><div class="en-stat-lbl">连续打卡（天）</div></div>
-      <div class="en-stat"><div class="en-stat-num">${data.english.length}</div><div class="en-stat-lbl">对话练习（组）</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><div class="card-title">每日打卡</div>
-        <button class="btn-ghost" id="checkinBtn" ${checkinToday?'disabled style="opacity:.4"':''}>${checkinToday?'✓ 已打卡':'打卡 +1'}</button>
+      <div class="en-stat duo">
+        <div class="en-stat-num">${streak}<span class="en-stat-num unit">天</span></div>
+        <div class="en-stat-lbl">Continuous Streak</div>
+        <a class="duolingo-link" href="https://www.duolingo.com/learn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 10h-2v4h-2v-4H9v-4h4V6h2v2h2v4z"/></svg>
+          打开多邻国
+        </a>
+      </div>
+      <div class="en-stat">
+        <div class="en-stat-num">${data.english.length}<span class="en-stat-num unit">组</span></div>
+        <div class="en-stat-lbl">Dictations Ready</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+          <a class="en-res-link" href="https://dict.eudic.net/ting" target="_blank" rel="noopener">📻 每日英语听力</a>
+          <a class="en-res-link" href="https://learnenglish.britishcouncil.org/skills/speaking" target="_blank" rel="noopener">🇬🇧 British Council 口语</a>
+        </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-header"><div class="card-title">听说陪练</div><span class="card-tag">${Math.min(3,data.english.length)} Scenes</span></div>
-      ${data.english.slice(0,3).map((d,i)=>`
+      <div class="card-header">
+        <div class="card-title">每日打卡</div>
+        <button class="btn-ghost" id="checkinBtn" ${checkedToday?'disabled style="opacity:.4;cursor:default"':''}>${checkedToday?'✓ 今日已打卡':'🔥 打卡 +1'}</button>
+      </div>
+      <div class="checkin-bar" id="checkinBar">${(()=>{let h='';const cd=data.englishCheckedDate;for(let i=6;i>=0;i--){const dt=new Date();dt.setDate(dt.getDate()-i);const dk=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;const cls=dk===cd?'done today':dk<cd?'done':'';h+=`<span class="checkin-cell ${cls}" title="${dk}">${String(dt.getDate()).padStart(2,'0')}</span>`}return h})()}</div>
+      <div style="font-size:10px;color:var(--ink-faint);margin-top:6px">最近7天打卡记录</div>
+      <div class="accent-radio">
+        <label><input type="radio" name="accent" value="en-US" ${accent==='en-US'?'checked':''} onchange="changeAccent('en-US')"> 美音</label>
+        <label><input type="radio" name="accent" value="en-GB" ${accent==='en-GB'?'checked':''} onchange="changeAccent('en-GB')"> 英音</label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">听写练习 · 每日英语听力</div><span class="card-tag">${data.english.length} Items</span></div>
+      <p style="font-size:11px;color:var(--ink-faint);margin-bottom:12px;letter-spacing:.04em">粘贴 每日英语听力 (dict.eudic.net) 或 BBC 6 Minute English 的 MP3 链接 → 播放 → 听写 → 提交</p>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input class="text-input" id="enNewUrl" placeholder="粘贴音频 MP3 链接（如 https://...mp3）" />
+        <input class="text-input" id="enNewTitle" placeholder="场景名称" style="max-width:120px" />
+        <input class="text-input" id="enNewLink" placeholder="参考链接URL" style="max-width:150px" />
+        <button class="btn-ghost" style="background:var(--blue);color:var(--paper);border:none;min-height:44px" onclick="addEnglishSource()">＋ 添加</button>
+      </div>
+      ${data.english.map((d,i)=>`
         <div class="scene-card">
-          <div class="scene-ctx">${d.ctx||'场景'}</div>
-          <div class="dialogue">
-            <div class="d-line"><div class="d-role">AUDIO</div><div class="d-text">${d.audio||d.transcript||''}</div></div>
+          <div class="scene-ctx">场景 · ${escHtml(d.ctx)}</div>
+          <p style="font-size:12px;color:var(--ink-faint);margin-bottom:8px">提示：${escHtml(d.hint||'')}</p>
+          ${d.link?`<div style="margin-bottom:8px"><a href="${escHtml(safeHref(d.link))}" target="_blank" rel="noopener" style="font-size:11px;color:var(--blue);text-decoration:none;border:1px solid var(--blue-light);padding:3px 10px;border-radius:12px;display:inline-block">↗ ${escHtml(d.linkLabel||'参考链接')}</a></div>`:''}
+          ${d.audioUrl?`
+          <audio id="enAudio${i}" controls preload="none" style="width:100%;height:36px;margin:6px 0;border-radius:8px">
+            <source src="${escHtml(d.audioUrl)}" type="audio/mpeg" />
+            你的浏览器不支持音频播放
+          </audio>
+          <input type="text" class="text-input" data-i="${i}" data-field="audioUrl" placeholder="更换 MP3 链接" value="${escHtml(d.audioUrl)}" style="font-size:11px;margin-bottom:8px" />
+          `:`<div style="display:flex;gap:6px;margin-bottom:8px">
+            <input type="text" class="text-input" data-i="${i}" data-field="audioUrl" placeholder="粘贴 MP3 链接后点击'加载音频'…" style="font-size:12px" />
+            <button class="btn-ghost" style="font-size:11px;min-height:36px;padding:6px 10px" onclick="loadAudioFor(${i})">加载</button>
+            <button class="btn-ghost" style="font-size:11px;min-height:36px;padding:6px 10px" onclick="playDictation(${i})">🔊 TTS朗读</button>
           </div>
-          ${d.hint?`<div class="d-hint">💡 ${d.hint}</div>`:''}
+          <textarea class="text-input" data-i="${i}" data-field="transcript" rows="2" placeholder="原文（用于比对得分，可填可不填）" style="font-size:12px;margin-bottom:8px">${escHtml(d.transcript||d.audio||'')}</textarea>`}
+          <input class="dictation-input" id="enInput${i}" placeholder="听到什么就写什么…" value="${escHtml(d.userAnswer||'')}" />
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button class="btn-ghost" onclick="checkDictation(${i})">✓ 提交听写</button>
+            <button class="btn-ghost" style="font-size:11px;padding:4px 10px;color:var(--vermilion)" onclick="removeEnglishSource(${i})">删除</button>
+          </div>
+          <div id="enResult${i}"></div>
+          ${d.score>0?`
           <div class="score-row">
-            <span style="font-size:10px;color:var(--ink-faint);letter-spacing:.14em">跟读评分</span>
-            <div class="score-bar"><div class="score-fill" style="width:${d.score||0}%"></div></div>
-            <span class="score-num">${d.score||0}</span>
-          </div>
-          <div style="margin-top:10px;display:flex;gap:8px">
-            <button class="btn-ghost" onclick="spkDialogue(${i})">▶ 播放</button>
-            <button class="btn-ghost" onclick="scoreDialogue(${i})">✎ 评分</button>
-          </div>
+            <span style="font-size:10px;color:var(--ink-faint)">准确率</span>
+            <div class="score-bar"><div class="score-fill" style="width:${d.score}%"></div></div>
+            <span class="score-num">${d.score}%</span>
+          </div>`:''}
         </div>
       `).join('')}
     </div>
-
-    <div class="card">
-      <div class="card-header"><div class="card-title">新增对话</div></div>
-      <div style="display:grid;gap:8px">
-        <input class="text-input" id="enCtx" placeholder="场景（如：BBC快速英语）" />
-        <input class="text-input" id="enAudio" placeholder="原文句子" />
-        <input class="text-input" id="enHint" placeholder="提示（如：旅行话题）" />
-        <button class="btn-ghost" style="background:var(--gold);color:var(--paper);border:none;justify-self:start" onclick="addDialogue()">＋ 添加</button>
-      </div>
-    </div>
   `;
 
-  if(!checkinToday&&$('#checkinBtn')){
+  if(!checkedToday){
     $('#checkinBtn').onclick=()=>{
       data.englishCheckedDate=today();
-      data.englishStreak=(data.englishStreak||0)+1;
-      saveData();rEnglish();
+      const yest=new Date();yest.setDate(yest.getDate()-1);
+      const ys=`${yest.getFullYear()}-${String(yest.getMonth()+1).padStart(2,'0')}-${String(yest.getDate()).padStart(2,'0')}`;
+      data.englishStreak=(data.englishCheckedDate===ys||!data.englishStreak)?(data.englishStreak||0)+1:1;
+      saveAll();renderEnglish();
     };
   }
 }
-function spkDialogue(i){
+function playDictation(i){
   const d=data.english[i];if(!d)return;
-  const txt = d.audio || d.transcript || '';
-  if(!('speechSynthesis' in window)){toast('浏览器不支持语音','warn');return}
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(txt);
-  u.lang=data.englishAccent||'en-US';u.rate=0.9;
-  speechSynthesis.speak(u);toast('播放中 🔊');
+  // 优先用 audioUrl 播放
+  if(d.audioUrl){
+    const a=document.getElementById('enAudio'+i);
+    if(a){a.play().catch(e=>alert('音频加载失败，请检查链接或网络'));return}
+  }
+  // 回退到 TTS 朗读
+  if(!('speechSynthesis' in window)){alert('当前无可用音频源，请先粘贴 MP3 链接');return}
+  const u=new SpeechSynthesisUtterance(d.audio||d.transcript);
+  u.lang=data.englishAccent||'en-US';u.rate=0.85;
+  speechSynthesis.cancel();speechSynthesis.speak(u);
 }
-function scoreDialogue(i){
+function addEnglishSource(){
+  const url=$('#enNewUrl').value.trim();
+  const title=$('#enNewTitle').value.trim()||'听写练习';
+  const link=$('#enNewLink')?$('#enNewLink').value.trim():'';
+  if(!url){alert('请粘贴 MP3 链接');return}
+  if(!/^https?:\/\//.test(url)){alert('链接格式不正确，应以 http:// 或 https:// 开头');return}
+  data.english.unshift({ctx:title,audio:'',audioUrl:url,transcript:'',hint:'用户自添加',link:link||'',linkLabel:link?'打开参考链接':'',score:0,userAnswer:''});
+  saveAll();renderEnglish();
+  $('#enNewUrl').value='';$('#enNewTitle').value='';if($('#enNewLink'))$('#enNewLink').value='';
+}
+function loadAudioFor(i){
   const d=data.english[i];if(!d)return;
-  d.score=Math.min(100,(d.score||0)+Math.floor(Math.random()*15)+8);
-  saveData();rEnglish();
+  const inp=document.querySelector(`input[data-i="${i}"][data-field="audioUrl"]`);
+  if(!inp||!inp.value.trim()){alert('请输入音频链接');return}
+  d.audioUrl=inp.value.trim();
+  saveAll();renderEnglish();
 }
-function addDialogue(){
-  const ctx=$('#enCtx').value.trim();
-  const audio=$('#enAudio').value.trim();
-  const hint=$('#enHint').value.trim();
-  if(!audio){toast('请输入原文','warn');return}
-  data.english.unshift({ctx:ctx||'自定义',audio,hint,transcript:audio,score:0,userAnswer:''});
-  saveData();rEnglish();
+function removeEnglishSource(i){
+  if(!confirm('删除这条听写？'))return;
+  data.english.splice(i,1);
+  saveAll();renderEnglish();
 }
+function checkDictation(i){
+  const d=data.english[i];if(!d)return;
+  const input=$('#enInput'+i).value.trim();
+  d.userAnswer=input;
+  if(!input){alert('请先输入你听到的内容');return}
+  // 使用 transcript 字段比对，没有就用 audio
+  const correctText=(d.transcript||d.audio||'').toLowerCase().replace(/[^a-z0-9\s\u4e00-\u9fa5]/g,' ').replace(/\s+/g,' ').trim();
+  const answer=input.toLowerCase().replace(/[^a-z0-9\s\u4e00-\u9fa5]/g,' ').replace(/\s+/g,' ').trim();
+  if(!correctText){alert('请先填入原文或绑定音频源');return}
+  const correctWords=correctText.split(' ').filter(w=>w.length>1);
+  const answerWords=answer.split(' ').filter(w=>w.length>1);
+  let match=0;
+  answerWords.forEach(w=>{if(correctWords.some(cw=>cw.includes(w)||w.includes(cw)))match++});
+  d.score=Math.round((match/Math.max(correctWords.length,answerWords.length))*100);
+  saveAll();renderEnglish();
+}
+function changeAccent(v){data.englishAccent=v;saveAll();renderEnglish()}
 
-/* ============ 3. 深度学习 ============ */
-const LDB = {
-  '养老':[
-    {theory:'养老金三支柱体系 — 国家、雇主、个人三层结构共同决定退休生活质量。',case:'中国基本养老保险覆盖10.5亿人，第二支柱企业年金仅占城镇职工5%。',q:'如果延迟退休到65岁，个人储备需要多积累多少年？'},
-    {theory:'个人养老金账户的税收递延机制 — 缴费期免税，投资期免税，领取期按3%税率计征。',case:'2024年个人养老金试点扩容至全国，每年缴费上限12000元。',q:'税延优惠 vs 流动性折损，你会优先选哪个？'}
-  ],
-  '经济学':[
-    {theory:'机会成本 — 真正决定财富走向的不是你选择做什么，而是你因此放弃了什么。',case:'巴菲特名言"致富的秘密是大多数人不愿意慢慢变富"。',q:'当下这笔钱投入 A 资产 5% vs 自我学习带来的能力跃迁，哪个机会成本更低？'},
-    {theory:'边际效用递减 — 第一杯咖啡带来的愉悦感远大于第十杯。',case:'消费降级的本质不是收入减少，是消费者更早触达了效用边际。',q:'理财中什么时候收益开始低于时间投入？'}
-  ],
-  '法律':[
-    {theory:'合同成立 ≠ 合同生效 — 意思表示一致只是第一步，附条件的合同需待条件成就。',case:'房屋买卖合同签字即成立，贷款被拒时合同自动失效。',q:'租房时房东承诺"下个月退押金"——有效吗？'},
-    {theory:'善意取得制度 — 即使卖方无权处分，善意第三人仍可取得所有权。',case:'二手车市场，甲把借来的车卖给不知情的乙，乙可取得所有权。',q:'二手平台交易中，如何评估"善意"？'}
-  ]
-};
-const domains=['养老','经济学','法律'];
-function rLearn(){
-  const d=domains[data.learnIndex%3];
-  const items=LDB[d];const item=items[Math.floor(Math.random()*items.length)];
+/* ===== 4. 深度学习 ===== */
+function renderLearn(){
+  const idx=data.learnIndex%DEFAULT_DATA.learnDomains.length;
+  const domain=DEFAULT_DATA.learnDomains[idx];
+  const items=LEARN_DB[domain];
+  const item=items[Math.floor(Math.random()*items.length)];
+  // 精选公众号
+  const accounts=item.accounts||[];
+
   $('#contentArea').innerHTML=`
-    <div class="learn-cycle">${domains.map((x,i)=>`<div class="cycle-dot ${i===data.learnIndex%3?'active':''}" onclick="cyLearn(${i})">${x}</div>`).join('')}</div>
-    <div class="learn-card">
-      <div class="learn-domain">领域 · ${d}</div>
-      <div class="learn-theory">${item.theory}</div>
-      <div class="learn-case-label">现实案例</div><div class="learn-case">${item.case}</div>
-      <div class="learn-case-label">今日思考</div><div class="learn-q">${item.q}</div>
+    <div class="learn-cycle">
+      ${DEFAULT_DATA.learnDomains.map((d,i)=>`<button class="cycle-dot ${i===idx?'active':''}" onclick="cycleLearn(${i})">${d}</button>`).join('')}
     </div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-top:16px">
-      <button class="btn-ghost" onclick="cyLearn()">↻ 换一个</button>
-      <button class="btn-ghost" onclick="toast('已收藏 ✓','ok')">★ 收藏</button>
+    <div class="learn-card">
+      <div class="learn-domain">领域 · ${domain}</div>
+      <div class="learn-theory">${item.theory}</div>
+      <div class="learn-case-label">现实案例</div>
+      <div class="learn-case">${item.case}</div>
+      <div class="learn-case-label">今日思考题</div>
+      <div class="learn-q">${item.q}</div>
+      ${item.answer?`
+      <button class="btn-ghost" style="margin-top:8px" onclick="toggleAnswer()">查看参考答案</button>
+      <div class="learn-answer" id="learnAnswer">${item.answer}</div>`:''}
+      ${accounts.length?`
+      <div class="accounts-block">
+        <div class="accounts-title">精选公众号 · ${domain}领域 <span style="font-size:9px;color:var(--ink-faint)">（点击唤起微信）</span></div>
+        <div class="accounts-grid">
+          ${accounts.map(a=>`<a class="account-chip" href="weixin://dl/business/?t=${encodeURIComponent(a.name)}" title="${a.tag} · 点击打开微信">
+            <span class="account-name">${a.name}</span>
+            <span class="account-tag">${a.tag}</span>
+          </a>`).join('')}
+        </div>
+        <div class="accounts-tip">点击公众号名称可唤起微信 App（需手机端打开）</div>
+      </div>`:''}
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+      <button class="btn-ghost" onclick="cycleLearn()">↻ 换一个案例</button>
+      <button class="btn-ghost" onclick="alert('已加入今日学习清单')">★ 收藏</button>
+      <button class="btn-ghost" onclick="shareToWechat('${domain}', '${item.theory}')" style="border-color:#07C160;color:#07C160">💬 分享到微信</button>
+      <button class="btn-ghost" onclick="window.open('https://weread.qq.com/web/search?q=${encodeURIComponent(domain)}','_blank')" style="border-color:var(--blue);color:var(--blue)">📚 微信读书</button>
+    </div>
+    <div id="wechatQrBox" style="display:none;text-align:center;margin-top:16px;padding:16px;background:var(--paper);border-radius:12px;border:1px solid var(--rule)">
+      <div style="font-size:13px;margin-bottom:10px;color:var(--ink)">📱 手机扫一扫，在微信中阅读</div>
+      <img id="wechatQrImg" style="width:180px;height:180px;border-radius:8px" alt="微信扫码" />
+      <div style="font-size:10px;color:var(--ink-faint);margin-top:6px">也可复制链接发到微信</div>
+      <button class="btn-ghost" style="margin-top:6px;font-size:11px" onclick="document.getElementById('wechatQrBox').style.display='none'">关闭</button>
     </div>
   `;
 }
-function cyLearn(i){
-  if(typeof i==='number')data.learnIndex=i;
-  else data.learnIndex=(data.learnIndex+1)%3;
-  saveData();rLearn();
+function cycleLearn(i){if(typeof i==='number')data.learnIndex=i;else data.learnIndex=(data.learnIndex+1)%DEFAULT_DATA.learnDomains.length;saveAll();renderLearn()}
+function toggleAnswer(){document.getElementById('learnAnswer').classList.toggle('open')}
+function shareToWechat(domain,theory){
+  const box=document.getElementById('wechatQrBox');
+  if(!box)return;
+  // 优先尝试唤起微信 App
+  const wxUrl='weixin://dl/business/?t='+encodeURIComponent(domain);
+  // 生成当前页面的二维码
+  const pageUrl=encodeURIComponent(location.href.split('?')[0]);
+  const qrApi='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+pageUrl;
+  document.getElementById('wechatQrImg').src=qrApi;
+  box.style.display='block';
+  // 移动端同时尝试唤起微信
+  if(/Mobile|Android|iPhone/i.test(navigator.userAgent)){
+    setTimeout(()=>{location.href=wxUrl},300);
+  }
 }
 
-/* ============ 4. 财务 ============ */
-function rFinance(){
-  const fin=data.finance;const pct=Math.min(100,Math.round((fin.spent/fin.budget)*100));
-  const remain=fin.budget-fin.spent;
-  const txs=data.transactions.slice(0,8);
-  const funds=data.funds;
+/* ===== 5. 财务记账 ===== */
+function renderFinance(){
+  const spend=data.finance.spent||0;
+  const budget=data.finance.budget||2000;
+  const pct=Math.min(100,Math.round((spend/budget)*100));
+  const remain=budget-spend;
+  const txs=data.transactions||[];
+  const images=data.fundImages||[];
 
   $('#contentArea').innerHTML=`
-    <div class="fin-summary">
-      <div class="fin-card"><div class="fin-lbl">月度预算</div><div class="fin-num">¥ ${fin.budget.toLocaleString()}</div><div class="fin-sub">Budget</div></div>
-      <div class="fin-card"><div class="fin-lbl">已支出</div><div class="fin-num">¥ ${fin.spent.toLocaleString()}</div><div class="fin-sub">${pct}%</div><div class="budget-bar ${pct>80?'budget-warn':''}"><div class="budget-fill" style="width:${pct}%"></div></div></div>
-      <div class="fin-card"><div class="fin-lbl">剩余</div><div class="fin-num ${remain<0?'dn':'up'}">¥ ${Math.abs(remain).toLocaleString()}</div><div class="fin-sub">${remain<0?'超支':'可支配'}</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><div class="card-title">基金持仓</div><span class="card-tag">${funds.length} 只</span></div>
-      ${funds.map(f=>{
-        const gainClass=f.gain>0?'up':'dn';const sign=f.gain>0?'+':'';
-        return `<div class="fund-row">
-          <div class="fund-info"><div class="fund-name">${f.name}<span class="fund-code">${f.code}</span></div><div class="fund-sub">持有 ¥${f.amount} · 日估 ${sign}${f.daily.toFixed(2)}</div></div>
-          <div class="fund-val ${gainClass}">${sign}${f.gain.toFixed(2)}</div>
-        </div>`;
-      }).join('')}
-    </div>
-
-    <div class="card">
-      <div class="card-header"><div class="card-title">流水</div><span class="card-tag">${txs.length} 笔</span></div>
-      ${txs.map(t=>`
-        <div class="tx-row"><div class="tx-info"><div class="tx-cat">${t.cat}</div><div><div class="tx-name">${t.name}</div><div class="tx-date">${t.date}</div></div></div><div class="tx-amt ${t.out?'out':'in'}">${t.out?'-':'+'} ¥${t.amt}</div></div>
-      `).join('')}
-    </div>
-
+    <!-- 快速记账（置顶） -->
     <div class="card">
       <div class="card-header"><div class="card-title">快速记账</div></div>
-      <div style="display:grid;grid-template-columns:60px 1fr 100px 80px;gap:8px">
-        <input class="text-input" id="txCat" placeholder="类目" maxlength="2" />
-        <input class="text-input" id="txName" placeholder="备注" />
-        <input class="text-input" id="txAmt" placeholder="金额" type="number" />
-        <button class="btn-ghost" style="background:var(--gold);color:var(--paper);border:none" onclick="addTx()">记一笔</button>
+      <div style="display:grid;grid-template-columns:55px 1fr 90px 60px;gap:6px;margin-bottom:6px">
+        <input id="txCat" placeholder="类目" maxlength="2" style="padding:8px 6px;font-size:14px;border:1px solid var(--rule);border-radius:6px;outline:none;font-family:inherit;background:var(--paper);min-height:44px;text-align:center" />
+        <input id="txName" placeholder="备注" style="font-size:14px;border:1px solid var(--rule);border-radius:6px;outline:none;font-family:inherit;background:var(--paper);min-height:44px;padding:0 10px" />
+        <input id="txAmt" type="number" placeholder="¥金额" style="font-size:14px;border:1px solid var(--rule);border-radius:6px;outline:none;font-family:inherit;background:var(--paper);min-height:44px;padding:0 8px" />
+        <button class="btn-ghost" style="background:var(--blue);color:var(--paper);border:none;min-height:44px;font-size:12px;padding:0 8px" onclick="addTx()">＋记</button>
       </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn-ghost" style="font-size:11px;padding:4px 10px" onclick="uploadReceipt(null)">📷 上传小票</button>
+        <input type="file" id="txReceiptFile" accept="image/*" style="display:none" onchange="handleTxReceipt(event)" />
+        <span style="font-size:10px;color:var(--ink-faint)">支持拍照/截图识别</span>
+      </div>
+    </div>
+
+    <!-- 预算总览 -->
+    <div class="fin-summary">
+      <div class="fin-card blu"><div class="fin-lbl">月度预算</div><div class="fin-num blu">¥ ${budget.toLocaleString()}</div><div class="fin-sub">Fixed Budget</div></div>
+      <div class="fin-card"><div class="fin-lbl">本月支出</div><div class="fin-num pos">¥ ${spend.toLocaleString()}</div><div class="fin-sub">${pct}% Used</div><div class="budget-bar"><div class="budget-fill" style="width:${pct}%"></div></div></div>
+      <div class="fin-card"><div class="fin-lbl">剩余可支配</div><div class="fin-num ${remain<0?'neg':'pos'}">¥ ${Math.abs(remain).toLocaleString()}</div><div class="fin-sub">${remain<0?'超支':'自由分配'}</div></div>
+    </div>
+
+    <!-- 最近流水 -->
+    ${txs.length?`
+    <div class="card">
+      <div class="card-header"><div class="card-title">最近流水</div><span class="card-tag">${txs.length} 条</span></div>
+      <div class="tx-list">
+        ${txs.map(t=>`
+          <div class="tx-row" id="tx-${t.id}">
+            <div class="tx-info">
+              <div class="tx-cat">${escHtml(t.cat||'')}</div>
+              <div>
+                <div class="tx-name" ondblclick="editTx('${t.id}')" title="双击编辑">${escHtml(t.name)}</div>
+                <div class="tx-date">${t.date}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              ${t.receipt?`<img src="${t.receipt}" style="width:32px;height:32px;border-radius:4px;object-fit:cover;border:1px solid var(--rule);cursor:zoom-in" onclick="viewReceipt('${t.id}')" title="查看小票" />`:''}
+              <div class="tx-amt ${t.out?'out':'in'}">${t.out?'-':'+'} ¥${t.amt.toLocaleString()}</div>
+              <button class="tx-edit-btn" onclick="editTx('${t.id}')" title="编辑">✎</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`:''}
+
+    <!-- 批量录入基金 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">批量录入基金</div>
+        <span class="card-tag" id="bulkFundStatus">从腾讯财通截图复制</span>
+      </div>
+      <p style="font-size:10px;color:var(--ink-faint);margin-bottom:8px">
+        格式：每行一条 → <code style="background:var(--bg);padding:1px 4px;border-radius:3px">名称 金额 累计收益 昨日收益</code>，制表符/空格分隔
+      </p>
+      <textarea class="text-input" id="bulkFundInput" rows="4" placeholder="南方纳斯达克100指数(QDII)A	980.38	-9.90	+30.71&#10;中欧中证科创创业50指数C	424.96	-75.11	+10.70&#10;..."></textarea>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn-ghost" style="background:var(--jade);color:var(--paper);border:none;flex:1" onclick="bulkImportFunds()">✓ 一键导入基金</button>
+        <button class="btn-ghost" onclick="document.getElementById('bulkFundInput').value='';document.getElementById('bulkFundStatus').textContent='已清空'">清空</button>
+      </div>
+    </div>
+
+    <!-- 基金估值（放最后） -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">基金估值</div>
+        <span class="card-tag">${today()}</span>
+        <button class="btn-ghost" style="font-size:11px;padding:2px 8px" onclick="fetchFundValues()" title="从新浪财经拉取实时估值">↻ 刷新估值</button>
+      </div>
+      ${(()=>{
+        const totalAmount=data.funds.reduce((s,f)=>s+(f.amount||0),0);
+        const totalGain=data.funds.reduce((s,f)=>s+(f.gain||0),0);
+        const totalDaily=data.funds.reduce((s,f)=>s+(f.daily||0),0);
+        return `
+        <div class="fund-summary-row">
+          <div><div style="font-size:10px;color:var(--ink-faint)">总持仓</div><div style="font-family:Georgia,serif;font-size:18px;color:var(--ink);font-weight:600">¥ ${totalAmount.toLocaleString(undefined,{maximumFractionDigits:2})}</div></div>
+          <div><div style="font-size:10px;color:var(--ink-faint)">累计收益</div><div style="font-family:Georgia,serif;font-size:18px;color:${totalGain>=0?'var(--vermilion)':'var(--jade)'};font-weight:600">${totalGain>=0?'+':''}¥ ${totalGain.toFixed(2)}</div></div>
+          <div><div style="font-size:10px;color:var(--ink-faint)">昨日收益</div><div style="font-family:Georgia,serif;font-size:18px;color:${totalDaily>=0?'var(--vermilion)':'var(--jade)'};font-weight:600">${totalDaily>=0?'+':''}¥ ${totalDaily.toFixed(2)}</div></div>
+        </div>
+        <div style="border-top:1px dashed var(--rule);margin:10px 0 0"></div>
+        `;
+      })()}
+      ${data.funds.map((f,i)=>`
+        <div class="fund-row">
+          <div style="flex:1;min-width:0">
+            <div class="fund-name">${escHtml(f.name)}<span class="fund-code">${f.code}</span></div>
+            <div style="font-size:10px;color:var(--ink-faint);margin-top:2px">持仓 ¥${(f.amount||0).toFixed(2)} · 累计 ${(f.gain||0)>=0?'+':''}${(f.gain||0).toFixed(2)}</div>
+          </div>
+          <div class="fund-est ${(f.daily||0)>=0?'up':'dn'}" style="text-align:right">
+            <div style="font-size:16px">${(f.daily||0)>=0?'+':''}${(f.daily||0).toFixed(2)}</div>
+            <div style="font-size:9px;color:var(--ink-faint);margin-top:1px">${f.currentNav?`净值 ${f.currentNav.toFixed(4)} · `:''}昨日</div>
+          </div>
+        </div>
+      `).join('')}
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn-ghost" onclick="document.getElementById('imgInput').click()">📷 上传截图</button>
+        <span style="font-size:10px;color:var(--ink-faint)">支持基金持仓截图，最多3张</span>
+      </div>
+      ${images.length?`<div style="margin-top:10px">${images.map((img,i)=>`<img class="fund-img" src="${img}" alt="截图${i+1}" title="截图${i+1}" />`).join('')}<br><button class="btn-ghost" style="font-size:10px;margin-top:6px" onclick="clearFundImages()">清空截图</button></div>`:''}
+      <div style="margin-top:12px;padding:10px 14px;background:var(--blue-glow);border-radius:8px;font-size:11px;color:var(--ink-soft)">▸ 操作建议：白酒仓位偏高可适度止盈，蓝筹精选维持定投节奏，仅供参考、不构成投资建议。</div>
     </div>
   `;
 }
 function addTx(){
-  const cat=$('#txCat').value||'杂';
-  const name=$('#txName').value;
-  const amt=parseFloat($('#txAmt').value);
-  if(!name||!amt){toast('请填写完整','warn');return}
-  data.transactions.unshift({id:'tx'+Date.now(),cat,name,amt,out:true,date:today(),receipt:''});
-  data.finance.spent+=amt;saveData();rFinance();
+  const cat=$('#txCat').value||'杂',name=$('#txName').value.trim(),amt=parseFloat($('#txAmt').value);
+  if(!name||!amt){alert('请填写备注和金额');return}
+  data.transactions.unshift({id:'tx'+Date.now(),cat,name,amt,out:true,date:today(),receipt:tempTxReceipt||''});
+  tempTxReceipt='';
+  data.finance.spent=(data.finance.spent||0)+amt;
+  saveAll();renderFinance();
+  $('#txCat').value='';$('#txName').value='';$('#txAmt').value='';
+}
+let tempTxReceipt='';
+function uploadReceipt(){
+  document.getElementById('txReceiptFile').click();
+}
+function handleTxReceipt(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');
+      const w=Math.min(img.width,600);const ratio=w/img.width;
+      c.width=w;c.height=Math.round(img.height*ratio);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      tempTxReceipt=c.toDataURL('image/jpeg',0.7);
+      alert('小票已加载！\n点"＋记"后会自动关联到这笔流水');
+    };
+    img.src=ev.target.result;
+  };
+  r.readAsDataURL(f);
+  e.target.value='';
+}
+function viewReceipt(id){
+  const tx=data.transactions.find(x=>x.id===id);if(!tx||!tx.receipt)return;
+  const w=window.open('','_blank','width=600,height=800');
+  w.document.write('<img src="'+tx.receipt+'" style="max-width:100%"/>');w.document.close();
+}
+function editTx(id){
+  const tx=data.transactions.find(x=>x.id===id);if(!tx)return;
+  const name=prompt('修改备注',tx.name);if(name===null)return;
+  const amt=parseFloat(prompt('修改金额',tx.amt));if(isNaN(amt)){alert('金额格式错误');return}
+  const cat=prompt('修改类目',tx.cat||'');if(cat!==null)tx.cat=cat;
+  tx.name=name.trim();tx.amt=amt;
+  saveAll();renderFinance();
+}
+function clearFundImages(){data.fundImages=[];saveAll();renderFinance()}
+function bulkImportFunds(){
+  const text=$('#bulkFundInput').value.trim();if(!text){alert('请粘贴基金数据');return}
+  const lines=text.split('\n').filter(l=>l.trim());
+  if(!lines.length)return;
+  // 解析：每行用空白/制表符分隔成 4 段
+  const newFunds=[];
+  let err=0;
+  lines.forEach(line=>{
+    const parts=line.split(/\s+|\t|，|,/);
+    // 至少要有名字和一个数字
+    if(parts.length<2){err++;return}
+    // 数字部分可能在最后 3 段；找到第一个数字作为起点
+    const nums=[];
+    const nameParts=[];
+    let foundFirstNum=false;
+    for(const p of parts){
+      if(!foundFirstNum&&/^-?\d+\.?\d*$/.test(p)){foundFirstNum=true;nums.push(p)}else if(foundFirstNum){nums.push(p)}else{nameParts.push(p)}
+    }
+    const name=nameParts.join(' ').trim();
+    if(!name||nums.length<1){err++;return}
+    newFunds.push({
+      id:'f'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      name:name,
+      amount:parseFloat(nums[0])||0,
+      gain:nums.length>=2?parseFloat(nums[1])||0:0,
+      daily:nums.length>=3?parseFloat(nums[2])||0:0
+    });
+  });
+  if(!newFunds.length){alert('未能解析任何有效数据，请检查格式');return}
+  // 追加到现有
+  if(!data.funds)data.funds=[];
+  data.funds=data.funds.concat(newFunds);
+  saveAll();renderFinance();
+  document.getElementById('bulkFundStatus').textContent='已导入 '+newFunds.length+' 条';
+  document.getElementById('bulkFundInput').value='';
+  alert('✓ 已成功导入 '+newFunds.length+' 条基金数据'+(err?'\n（'+err+' 行解析失败）':''));
 }
 
-/* ============ 5. 收藏 ============ */
-function rCollect(){
-  const items=data.collect.slice(0,10);
+/* ===== 6. 内容沉淀 ===== */
+function renderCollect(){
+  const items=data.collect.slice(0,8);
   $('#contentArea').innerHTML=`
     <div class="card">
       <div class="card-header"><div class="card-title">灵光收藏</div><span class="card-tag">Bookmarks</span></div>
-      <div style="display:grid;gap:8px;margin-bottom:16px">
-        <input class="text-input" id="clUrl" placeholder="链接（可留空）" />
-        <textarea class="text-input" id="clDesc" rows="2" placeholder="描述内容…"></textarea>
-        <button class="btn-ghost" style="background:var(--gold);color:var(--paper);border:none;justify-self:start" onclick="addColl()">＋ 智能归档</button>
+      <div style="display:grid;gap:8px;margin-bottom:14px">
+        <input class="text-input" id="clUrl" placeholder="抖音链接（如 https://v.douyin.com/xxx/）" />
+        <textarea class="text-input" id="clDesc" rows="2" placeholder="口述或粘贴内容…"></textarea>
+        <button class="btn-ghost" style="background:var(--blue);color:var(--paper);border:none;justify-self:start" onclick="addCollect()">＋ 智能归档</button>
       </div>
     </div>
-    ${items.length?`<div class="card"><div class="card-header"><div class="card-title">近期沉淀</div><span class="card-tag">${items.length} 条</span></div>
-      ${items.map(it=>`<div class="collect-item"><div class="collect-cat ${it.kind}">${it.kindLabel}</div><div class="collect-title">${it.title}</div><div class="collect-ai">${it.summary}</div><div class="collect-date">${it.date}</div></div>`).join('')}
-    </div>`:`<div class="card"><div class="empty-tip">尚无收藏，去发现值得沉淀的内容</div></div>`}
+    ${items.length?`
+    <div class="card">
+      <div class="card-header"><div class="card-title">近期沉淀</div><span class="card-tag">${items.length} 条</span></div>
+      ${items.map(it=>`
+        <div class="collect-item">
+          <div class="collect-cat ${it.kind}">${it.kindLabel}</div>
+          <div class="collect-title">${escHtml(it.title)}</div>
+          <div class="collect-ai">${it.summary.replace(/\n/g,'<br>')}</div>
+          <div class="collect-meta">
+            <span>${it.date}</span>
+            ${it.url&&safeHref(it.url)!=='#'?`<a class="douyin-btn" href="${escHtml(safeHref(it.url))}" target="_blank" rel="noopener noreferrer">📱 打开抖音 ↗</a>`:''}
+          </div>
+        </div>
+      `).join('')}
+    </div>`:`
+    <div class="card"><div class="empty-tip">尚无收藏，去抖音发现一些值得沉淀的内容</div></div>`}
   `;
 }
-function addColl(){
-  const url=$('#clUrl').value.trim();
-  const desc=$('#clDesc').value.trim();
-  if(!desc){toast('请输入内容','warn');return}
-  const kw={idea:['灵感','想法','创意','思路','方法','AI'],skill:['教程','技巧','怎么做','如何','教学','步骤'],fun:['搞笑','解压','好玩','梗','猫','狗']};
-  let kind='idea';for(const k in kw){if(kw[k].some(w=>desc.includes(w))){kind=k;break}}
+function addCollect(){
+  const url=$('#clUrl').value.trim(),desc=$('#clDesc').value.trim();
+  if(!desc){alert('请输入内容');return}
+  const kw={idea:['灵感','想法','创意','思路','思考','AI'],skill:['教程','技巧','怎么做','如何','教学','流程'],fun:['搞笑','解压','好玩','梗','猫','狗']};
+  let kind='idea',label='灵感库';
+  for(const k in kw){if(kw[k].some(w=>desc.includes(w)))kind=k}
   const lm={idea:'灵感库',skill:'技能教程',fun:'搞笑解压'};
-  data.collect.unshift({kind,kindLabel:lm[kind],title:desc.slice(0,20)+'…',summary:'▸ '+desc.slice(0,180),url,date:today()});
-  saveData();rCollect();toast('已归档 ✓','ok');
+  const tt={idea:'一条关于'+(desc.match(/[\u4e00-\u9fa5]{2,8}/)?.[0]||'思考')+'的收藏',skill:'一份实用技巧：'+(desc.match(/[\u4e00-\u9fa5]{2,8}/)?.[0]||'方法'),fun:'一段轻松时刻'};
+  data.collect.unshift({kind,kindLabel:lm[kind],title:tt[kind],summary:'▸ '+desc.slice(0,180)+'。\n▸ 联想：可与日常工作/学习中的同类问题对照，形成自己的实操清单。',url,date:today()});
+  saveAll();renderCollect();
 }
 
-/* ============ 6. 阅读 ============ */
-function rRead(){
-  const books=data.books;const bi=data.readingIndex%books.length;
-  const book=books[bi]||DEFAULT.books[0];
+/* ===== 7. 阅读管理 ===== */
+function renderRead(){
+  const idx=(data.readingIndex||0)%(data.books||[]).length||0;
+  if(idx>=(data.books||[]).length)data.readingIndex=0;
+  const book=data.books[data.readingIndex]||data.books[0]||{title:'未命名',author:'',current:0,total:1,readingNotes:''};
   const pct=book.total?Math.round((book.current/book.total)*100):0;
+  const poems=data.poems||[];
+  const todayPoem=poems[new Date().getDate()%poems.length]||{t:'',s:'',ctx:''};
 
   $('#contentArea').innerHTML=`
-    <div class="learn-cycle">${books.map((b,i)=>`<div class="cycle-dot ${i===bi?'active':''}" onclick="swBook(${i})">${b.title}</div>`).join('')}</div>
+    <!-- 书籍切换 -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="book-selector">
+        ${(data.books||[]).map((b,i)=>`<button class="book-chip ${i===idx?'active':''}" onclick="switchBook(${i})">${escHtml(b.title.slice(0,6))}${b.title.length>6?'…':''}</button>`).join('')}
+        <button class="book-chip add" onclick="toggleAddBook()" title="添加书籍">＋</button>
+      </div>
+      <div class="add-book-form" id="addBookForm" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+          <input class="text-input" id="newBookTitle" placeholder="书名" />
+          <input class="text-input" id="newBookAuthor" placeholder="作者" />
+        </div>
+        <input class="text-input" id="newBookUrl" placeholder="微信读书链接（可选）" style="margin-top:6px" />
+        <button class="btn-ghost" style="margin-top:8px;background:var(--gold);color:var(--paper);border:none" onclick="addBook()">确认添加</button>
+      </div>
+    </div>
 
     <div class="book-current">
-      <div class="book-cover">${(book.title||'书').charAt(0)}</div>
+      <div class="book-cover">${(book.title||'书')[0]}</div>
       <div class="book-info">
-        <div class="book-title">${book.title}</div>
-        <div class="book-author">${book.author}</div>
-        <div class="book-progress"><div class="book-bar"><div class="book-fill" style="width:${pct}%"></div></div><div class="book-pct">${pct}%</div></div>
-        ${book.readingNotes?`<div class="book-note">📝 ${book.readingNotes}</div>`:''}
+        <div class="book-title">${escHtml(book.title)}</div>
+        <div class="book-author">${escHtml(book.author)}</div>
+        ${book.total?`
+        <div class="book-progress">
+          <div class="book-bar"><div class="book-fill" style="width:${pct}%"></div></div>
+          <div class="book-pct">${pct}%</div>
+          <div style="font-size:10px;color:var(--ink-faint);min-width:80px">P.${book.current}/${book.total}</div>
+        </div>`:''}
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn-ghost weread-btn" href="${escHtml(safeHref(book.wereadUrl)||'https://weread.qq.com/')}" target="_blank" rel="noopener noreferrer" onclick="openWeread(event,'${escHtml(safeHref(book.wereadUrl)||'weread://')}')" style="text-decoration:none">
+            📱 同步微信读书
+          </a>
+          ${(data.books||[]).length>1?`<button class="btn-ghost" style="font-size:11px;color:var(--vermilion);border-color:var(--vermilion)" onclick="removeBook(${idx})">删除本书</button>`:''}
+        </div>
       </div>
     </div>
 
     <div class="card">
       <div class="card-header"><div class="card-title">更新进度</div></div>
-      <div style="display:grid;grid-template-columns:1fr 80px 80px;gap:8px;align-items:center;margin-bottom:10px">
-        <input class="text-input" id="bkTitle" value="${book.title||''}" placeholder="书名" />
-        <input class="text-input" id="bkCur" type="number" value="${book.current||0}" placeholder="当前" />
-        <input class="text-input" id="bkTot" type="number" value="${book.total||0}" placeholder="总页" />
-      </div>
-      <textarea class="text-input" id="bkNote" rows="2" placeholder="阅读笔记…">${book.readingNotes||''}</textarea>
-      <button class="btn-ghost" style="margin-top:10px;background:var(--gold);color:var(--paper);border:none" onclick="upBook(${bi})">↻ 更新</button>
+      <div style="display:grid;grid-template-columns:1fr 80px 80px;gap:8px"><input class="text-input" id="bkTitle" placeholder="书名" value="${escHtml(book.title)}" /><input class="text-input" id="bkCur" type="number" placeholder="当前页" value="${book.current}" /><input class="text-input" id="bkTot" type="number" placeholder="总页" value="${book.total}" /></div>
+      <button class="btn-ghost" style="margin-top:12px;background:var(--blue);color:var(--paper);border:none" onclick="updateBook()">↻ 同步进度</button>
     </div>
-  `;
-}
-function swBook(i){data.readingIndex=i;saveData();rRead()}
-function upBook(idx){
-  const b=data.books[idx];
-  b.title=$('#bkTitle').value||b.title;
-  b.current=parseInt($('#bkCur').value)||b.current;
-  b.total=parseInt($('#bkTot').value)||b.total;
-  b.readingNotes=$('#bkNote').value;
-  saveData();rRead();toast('已更新 ✓','ok');
-}
 
-/* ============ 7. 诗词摘录 ============ */
-function rPoems(){
-  const poems=data.poems;
-  $('#contentArea').innerHTML=`
-    <div class="card"><div class="card-header"><div class="card-title">诗词摘录</div><span class="card-tag">${poems.length} 首</span></div>
-      ${poems.map(p=>`
-        <div class="poem-card"><div class="poem-ctx">${p.ctx||''}</div><div class="poem-text">${p.t}</div><div class="poem-src">— ${p.s}</div></div>
+    ${book.wereadUrl?`
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">导入微信读书笔记</div>
+        <span class="card-tag">结构化归档</span>
+      </div>
+      <p style="font-size:11px;color:var(--ink-faint);margin-bottom:8px">
+        微信读书 App → 打开书籍 → 右上角「...」→ 导出笔记/划线 → 粘贴到这里<br>
+        <span style="color:var(--blue)">自动按章节归类，与下方的"阅读笔记"独立分开</span>
+      </p>
+      <textarea class="text-input" id="wereadNotes" rows="4" placeholder="粘贴微信读书导出的笔记，例：&#10;◆ 第一章 地方政府的权力与事务&#10;> 在某种意义上，经济增长不是市场自发产生的&#10;> 地方政府是经济发展中的关键行动者。&#10;◆ 第三章&#10;标注：事权下放，财权上收&#10;想法：这个观点很有启发"></textarea>
+      <button class="btn-ghost" style="margin-top:8px;background:var(--jade);color:var(--paper);border:none" onclick="importWereadNotes()">✓ 一键导入分析</button>
+    </div>
+    ${(book.wereadNotes||[]).length?`
+    <div class="card">
+      <div class="card-header"><div class="card-title">已归档笔记</div><span class="card-tag">${book.wereadNotes.length} 章 · 惠存</span></div>
+      ${book.wereadNotes.map((ch,i)=>`
+        <div class="wn-chapter">
+          <div class="wn-chapter-head" onclick="toggleChapter(${i})">${escHtml(ch.chapter)} <span style="font-size:10px;color:var(--ink-faint)">${ch.quotes.length}条划线 ${ch.thoughts?.length?ch.thoughts.length+'条想法':''}</span></div>
+          <div class="wn-body" id="wnBody${i}">
+            ${ch.quotes.map(q=>`<div class="wn-quote">"${escHtml(q)}"</div>`).join('')}
+            ${(ch.thoughts||[]).map(th=>`<div class="wn-thought">💭 ${escHtml(th)}</div>`).join('')}
+          </div>
+        </div>
       `).join('')}
+      <button class="btn-ghost" style="margin-top:8px;font-size:10px;color:var(--vermilion)" onclick="clearWereadNotes()">清空归档</button>
+    </div>`:''}
+    `:''}
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">阅读笔记</div><span class="card-tag">个人反思</span></div>
+      <p style="font-size:10px;color:var(--ink-faint);margin-bottom:6px">你自己的思考、疑问、联想——区别于上方导入的划线摘录</p>
+      <textarea class="text-input" id="readingNotes" rows="5" placeholder="记录你的阅读心得、疑问、联想…">${escHtml(book.readingNotes||'')}</textarea>
+      <button class="btn-ghost" style="margin-top:10px;background:var(--gold);color:var(--paper);border:none" onclick="saveReadingNotes()">保存笔记</button>
     </div>
-    <div class="card"><div class="card-header"><div class="card-title">添加摘录</div></div>
-      <div style="display:grid;gap:8px">
-        <input class="text-input" id="pmText" placeholder="诗词正文" />
-        <input class="text-input" id="pmSrc" placeholder="出处（如：杜甫·春望）" />
-        <input class="text-input" id="pmCtx" placeholder="标签（如：家国感怀）" />
-        <button class="btn-ghost" style="background:var(--gold);color:var(--paper);border:none;justify-self:start" onclick="addPoem()">＋ 添加</button>
+
+    <div class="card poetry-card">
+      <div class="card-header"><div class="card-title">古诗词赏析</div><span class="card-tag">${todayPoem.ctx||'摘录'}</span></div>
+      <div class="poetry-block">
+        <div class="poetry-text">${escHtml(todayPoem.t)}</div>
+        <div class="poetry-src">— ${escHtml(todayPoem.s)}</div>
       </div>
+      <p style="font-size:10px;color:var(--ink-faint);margin-top:6px;text-align:center;letter-spacing:.1em">每日一首，今日为你推送</p>
     </div>
   `;
 }
-function addPoem(){
-  const t=$('#pmText').value.trim();const s=$('#pmSrc').value.trim();const ctx=$('#pmCtx').value.trim();
-  if(!t){toast('请输入诗词','warn');return}
-  data.poems.unshift({t,s:s||'佚名',ctx:ctx||'摘录'});
-  saveData();rPoems();toast('已添加 ✓','ok');
+function switchBook(i){data.readingIndex=i;saveAll();renderRead()}
+function toggleAddBook(){$('#addBookForm').style.display=$('#addBookForm').style.display==='none'?'block':'none'}
+function addBook(){
+  const t=$('#newBookTitle').value.trim(),a=$('#newBookAuthor').value.trim(),u=$('#newBookUrl').value.trim();
+  if(!t){alert('请输入书名');return}
+  data.books.push({title:t,author:a||'佚名',current:0,total:0,wereadUrl:u,readingNotes:''});
+  data.readingIndex=data.books.length-1;saveAll();renderRead();
 }
-
-/* ============ 8. 待办 ============ */
-function rTodo(){
-  const todos=data.todos;const pending=todos.filter(t=>!t.done);
-  $('#contentArea').innerHTML=`
-    <div class="card"><div class="card-header"><div class="card-title">待办总览</div><span class="card-tag">${pending.length}/${todos.length}</span></div>
-      <div class="todo-input"><input id="todoInput" placeholder="添加待办…" onkeydown="if(event.key==='Enter')addTodo()" /><button onclick="addTodo()">＋ 录入</button></div>
-    </div>
-    ${todos.length?`<div class="card">${todos.map(t=>`
-      <div class="todo-row ${t.done?'done':''}"><div class="todo-check" onclick="tgTodo('${t.id}')"></div><div class="todo-text">${t.text}</div><div class="todo-meta">${t.created||'今天'}</div><button class="todo-del" onclick="rmTodo('${t.id}')">×</button></div>
-    `).join('')}</div>`:'<div class="card"><div class="empty-tip">心如明镜，一无所欠</div></div>'}
-  `;
+function removeBook(i){
+  if(!confirm('确认删除「'+(data.books[i]?.title||'')+'」？'))return;
+  data.books.splice(i,1);if(data.readingIndex>=data.books.length)data.readingIndex=0;
+  saveAll();renderRead();
 }
-function addTodo(){
-  const txt=$('#todoInput').value.trim();if(!txt)return;
-  data.todos.unshift({id:Date.now().toString(),text:txt,done:false,created:today()});
-  saveData();rTodo();
+function saveReadingNotes(){
+  const notes=$('#readingNotes').value;const idx=data.readingIndex||0;
+  const book=data.books[idx];if(book){book.readingNotes=notes;saveAll();alert('笔记已保存')}
 }
-function tgTodo(id){
-  const t=data.todos.find(x=>x.id===id);if(!t)return;
-  t.done=!t.done;saveData();rTodo();
+function updateBook(){
+  const t=$('#bkTitle').value,c=parseInt($('#bkCur').value)||0,tot=parseInt($('#bkTot').value)||0;
+  const book=data.books[data.readingIndex||0]||data.books[0];book.title=t;book.current=c;book.total=tot;
+  saveAll();renderRead();
 }
-function rmTodo(id){
-  data.todos=data.todos.filter(x=>x.id!==id);
-  saveData();rTodo();
-}
-
-/* ============ 新闻拉取 ============ */
-async function fetchNews(){
-  try{
-    const api='https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2509&k=&num=8&page=1';
-    const proxy='https://api.allorigins.win/raw?url='+encodeURIComponent(api);
-    const res=await fetch(proxy);if(!res.ok)throw new Error();
-    const json=await res.json();
-    if(json?.result?.data){
-      data.news=json.result.data.slice(0,8).map(n=>({title:n.title,summary:(n.intro||'').slice(0,40),source:n.media||'新浪',link:n.url,time:new Date(n.ctime*1000).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}));
-      saveData();if(curPage==='morning')rMorning();
-    }
-  }catch(e){
-    // fallback: use cached
-    if(data.news.length&&curPage==='morning')rMorning();
+function openWeread(event,url){
+  // 拦截click，优先用 weread:// 深链
+  if(/weread:\/\//i.test(url)){
+    event.preventDefault();
+    window.location.href=url;
+    // 如果3秒内未跳转，说明没装App，回退到网页
+    setTimeout(()=>{window.open('https://weread.qq.com/','_blank')},2500);
   }
 }
+function importWereadNotes(){
+  const text=$('#wereadNotes').value.trim();if(!text){alert('请先粘贴微信读书笔记');return}
+  const b=data.books[data.readingIndex||0];
+  if(!b.wereadNotes)b.wereadNotes=[];
+  const chapters=[];
+  let cur={chapter:'未分类',quotes:[],thoughts:[]};
+  text.split('\n').forEach(line=>{
+    const l=line.trim();if(!l)return;
+    // 章节标记
+    if(l.startsWith('◆')){
+      if(cur.quotes.length||cur.thoughts.length)chapters.push(cur);
+      cur={chapter:l.replace('◆','').trim().slice(0,40),quotes:[],thoughts:[]};
+      return;
+    }
+    if(l.startsWith('> ')){cur.quotes.push(l.slice(2).trim());return}
+    if(l.startsWith('标注：')){cur.quotes.push(l.slice(3).trim());return}
+    if(l.startsWith('想法：')){cur.thoughts.push(l.slice(3).trim());return}
+    // 其他长文字当作附加划线
+    if(l.length>6&&!l.startsWith('◆')&&!l.startsWith('>')&&!l.startsWith('标注')&&!l.startsWith('想法')){
+      cur.quotes.push(l);
+    }
+  });
+  if(cur.quotes.length||cur.thoughts.length)chapters.push(cur);
+  b.wereadNotes=chapters;
+  saveAll();renderRead();
+  alert('已导入并解析 '+(b.wereadNotes||[]).reduce((s,c)=>s+c.quotes.length,0)+' 条划线、'+(b.wereadNotes||[]).reduce((s,c)=>s+(c.thoughts||[]).length,0)+' 条想法\n按 '+b.wereadNotes.length+' 个章节归类');
+}
+function toggleChapter(i){
+  const el=document.getElementById('wnBody'+i);if(el)el.style.display=el.style.display==='none'?'block':'none';
+}
+function clearWereadNotes(){
+  if(!confirm('清空当前书的导入笔记归档？'))return;
+  const b=data.books[data.readingIndex||0];if(b)b.wereadNotes=[];saveAll();renderRead();
+}
 
-/* ============ 侧边栏 ============ */
-function openSidebar(){if(window.innerWidth<=860){$('#sidebar').classList.add('open');$('#overlay').classList.add('show')}}
-function closeSidebar(){$('#sidebar').classList.remove('open');$('#overlay').classList.remove('show')}
+/* ===== 新闻拉取（财经+政治双频道，CORS代理三层fallback） ===== */
+async function fetchNews(){
+  const badge=$('#statusBadge');
+  if(badge){badge.innerHTML='● 加载中';badge.style.color='var(--gold)'}
+
+  // 同时拉取财经(lid=2509)和政治(lid=2516)，合并后再拉全球(lid=2515)
+  async function fetchChannel(lid,num){
+    const apiUrl='https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid='+lid+'&k=&num='+num+'&page=1';
+    const proxyUrl='https://api.allorigins.win/raw?url='+encodeURIComponent(apiUrl);
+    try{const res=await fetch(proxyUrl);if(res.ok){const j=await res.json();if(j?.result?.data)return j.result.data}}
+    catch(e){console.warn('News channel '+lid+' CORS proxy failed',e)}
+    try{const res=await fetch(apiUrl);if(res.ok){const j=await res.json();if(j?.result?.data)return j.result.data}}
+    catch(e){console.warn('News channel '+lid+' direct failed',e)}
+    return [];
+  }
+
+  function mapItems(items){
+    return items.map(n=>({
+      id:'n'+Date.now()+Math.random(),title:n.title,
+      summary:(n.intro||'').slice(0,50)||n.title.slice(0,40),
+      source:n.media||'新浪',link:n.url,
+      time:new Date(n.ctime*1000).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})
+    }));
+  }
+
+  // 并行拉取财经+政治
+  const [finance,politics]=await Promise.all([fetchChannel(2509,5),fetchChannel(2516,5)]);
+  const finItems=mapItems(finance);const polItems=mapItems(politics);
+
+  // 合并去重（按title），财经优先4条 + 政治3条，不够用对方补齐
+  const seen=new Set();
+  const merged=[];
+  const addWithCategory=(items,cat,max)=>{
+    for(const n of items){
+      if(merged.length>=max)break;
+      if(seen.has(n.title))continue;
+      seen.add(n.title);n.category=cat;merged.push(n);
+    }
+  };
+  addWithCategory(finItems,'finance',4);
+  addWithCategory(polItems,'politics',4+3);
+  addWithCategory(finItems,'finance',8); // 如果政治不够，财经补齐
+  addWithCategory(polItems,'politics',8);
+
+  if(merged.length>0){
+    data.news=merged.slice(0,8);
+    saveAll();if(curPage==='morning')renderMorning();
+    if(badge){badge.innerHTML='● 实时';badge.style.color='var(--jade)'}
+    return;
+  }
+
+  console.warn('新闻获取失败，使用本地数据');
+  if(badge){badge.innerHTML='● 离线';badge.style.color='var(--vermilion)'}
+}
+/* ===== 基金实时估值拉取（JSONP） ===== */
+function fetchFundValues(){
+  const codes=data.funds.map(f=>'of'+f.code).join(',');
+  if(!codes)return;
+  const cbName='fundCb_'+Date.now();
+  let done=false,timeoutId=null;
+
+  function cleanup(){
+    done=true;
+    try{delete window[cbName]}catch(e){window[cbName]=undefined}
+    const s=document.getElementById('fundScript');if(s)s.remove();
+    if(timeoutId)clearTimeout(timeoutId);
+  }
+
+  window[cbName]=function(){
+    if(done)return;cleanup();
+    // 读取全局 hq_str_of{CODE} 变量，更新基金数据
+    data.funds.forEach(f=>{
+      const gk='hq_str_of'+f.code;
+      if(typeof window[gk]==='string'){
+        const parts=window[gk].split(','); // 名称,最新净值,累计净值,前日净值,涨跌幅%,日期
+        if(parts.length>=5){
+          const dailyPct=parseFloat(parts[4])||0;
+          const nav=parseFloat(parts[1])||0;
+          // 用最新净值和持仓份额估算 daily 收益
+          if(nav>0&&f.amount>0){
+            const prevNav=parseFloat(parts[3])||nav;
+            const shares=f.amount/nav; // 估算持仓份额
+            f.daily=Math.round(shares*dailyPct/100*nav*100)/100;
+          }
+          f.currentNav=nav;
+          delete window[gk]; // 清理
+        }
+      }
+    });
+    saveAll();if(curPage==='finance')renderFinance();
+  };
+
+  const script=document.createElement('script');
+  script.id='fundScript';
+  script.src='https://hq.sinajs.cn/list='+codes;
+  script.onerror=cleanup;
+  document.body.appendChild(script);
+  timeoutId=setTimeout(cleanup,8000);
+  // 等脚本执行后调用回调
+  setTimeout(()=>{if(!done&&window[cbName])window[cbName]()},500);
+}
+
+/* ===== 导出导入 ===== */
+function exportData(){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='loran_backup_'+today()+'.json';a.click();
+}
+function importData(){
+  const input=document.createElement('input');input.type='file';input.accept='.json';
+  input.onchange=async e=>{
+    try{
+      const text=await e.target.files[0].text();
+      const d=JSON.parse(text);
+      if(!confirm('导入将覆盖当前所有数据，确认继续？'))return;
+      data={...data,...d};saveAll();
+      alert('导入成功！刷新页面后可用');
+    }catch(e){alert('格式错误，请选择有效的 JSON 备份文件')}
+  };
+  input.click();
+}
+
+/* ===== 跨设备同步（剪贴板） ===== */
+function syncExport(){
+  try{
+    const json = JSON.stringify(data);
+    const b64 = btoa(unescape(encodeURIComponent(json)));
+    const syncCode = 'LORAN:'+b64;
+    navigator.clipboard.writeText(syncCode).then(()=>{
+      alert('数据已复制到剪贴板！\n在另一台设备打开工作台 → 点"📥 同步进来"即可恢复');
+    }).catch(e=>{
+      // 降级方案：用textarea
+      const ta=document.createElement('textarea');ta.value=syncCode;document.body.appendChild(ta);
+      ta.select();document.execCommand('copy');document.body.removeChild(ta);
+      alert('数据已复制到剪贴板！（降级方案）\n在另一台设备打开工作台 → 点"📥 同步进来"');
+    });
+  }catch(e){alert('同步失败：'+e.message)}
+}
+async function syncImport(){
+  try{
+    let text='';
+    // 优先读剪贴板
+    try{text=await navigator.clipboard.readText()}catch(e){text=prompt('请粘贴从另一台设备复制的同步码')}
+    if(!text||!text.startsWith('LORAN:')){alert('剪贴板中没有有效的同步码\n请先在另一台设备点"📤 同步出去"');return}
+    const b64=text.slice(6);
+    const json=decodeURIComponent(escape(atob(b64)));
+    const d=JSON.parse(json);
+    if(!d.todos&&!d.english&&!d.finance){alert('数据格式不正确');return}
+    if(!confirm('即将从剪贴板恢复 '+d.todos.length+' 条数据，是否覆盖当前所有数据？'))return;
+    data={...data,...d};saveAll();
+    go(curPage);
+    alert('同步成功！\n已在手机/电脑之间恢复数据');
+  }catch(e){alert('同步失败：'+e.message+'\n请确认剪贴板内容未被覆盖')}
+}
+
+/* ===== 图片上传 ===== */
+function handleImageUpload(e){
+  const files=e.target.files;if(!files||!files.length)return;
+  if((data.fundImages||[]).length+files.length>3){alert('最多3张截图');e.target.value='';return}
+  Array.from(files).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const img=new Image();
+      img.onload=()=>{
+        const c=document.createElement('canvas');
+        const w=Math.min(img.width,800);const ratio=w/img.width;
+        c.width=w;c.height=Math.round(img.height*ratio);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        const dataUrl=c.toDataURL('image/jpeg',0.8);
+        if(!data.fundImages)data.fundImages=[];data.fundImages.push(dataUrl);
+        saveAll();renderFinance();
+      };
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+
+/* ===== 侧边栏 ===== */
+function openSidebar(){$('#sidebar').classList.add('open');$('#sidebarOverlay').classList.add('show');$('#sidebarToggle').classList.add('active')}
+function closeSidebar(){$('#sidebar').classList.remove('open');$('#sidebarOverlay').classList.remove('show');$('#sidebarToggle').classList.remove('active')}
 function toggleSidebar(){$('#sidebar').classList.contains('open')?closeSidebar():openSidebar()}
 
-/* ============ 启动 ============ */
-function bindEvents(){
-  $$('.nav-item').forEach(n=>n.onclick=()=>{go(n.dataset.page);if(window.innerWidth<860)closeSidebar()});
-  $('#refreshBtn').onclick=async()=>{const b=$('#refreshBtn');b.classList.add('spin');await fetchNews();setTimeout(()=>b.classList.remove('spin'),500)};
-  $('#sidebarToggle').onclick=toggleSidebar;
-  $('#sidebarClose').onclick=closeSidebar;
-  $('#overlay').onclick=closeSidebar;
+/* ===== 主题切换 ===== */
+const THEMES = ['warm','ink','rose','night'];
+const THEME_LABELS = {warm:'藏书票',ink:'水墨山水',rose:'暮光玫瑰',night:'夜色墨卷'};
+const THEME_ICONS = {
+  warm:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
+  ink:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  rose:'<circle cx="12" cy="9" r="3"/><path d="M12 12c-2 3-2 6 0 6s2-3 0-6z"/><path d="M12 12c-2-3-2-6 0-6s2 3 0 6z"/><line x1="12" y1="4" x2="12" y2="2"/><line x1="12" y1="18" x2="12" y2="22"/>',
+  night:'<circle cx="12" cy="12" r="5"/><circle cx="12" cy="7" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="17" r="1"/><circle cx="7" cy="12" r="1"/><circle cx="17" cy="12" r="1"/><path d="M5 5l2 2M17 17l2 2"/>'
+};
+function setTheme(theme){
+  document.documentElement.setAttribute('data-theme',theme);
+  ls.set('theme',theme);
+  const icon=$('#themeIcon');
+  icon.innerHTML=THEME_ICONS[theme]||THEME_ICONS.warm;
+  $('#themeBtn').title='当前：'+THEME_LABELS[theme]+'（点击切换下一个）';
+}
+function cycleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme')||'warm';
+  const idx=THEMES.indexOf(cur);
+  const next=THEMES[(idx+1)%THEMES.length];
+  setTheme(next);
+}
 
+/* ===== 启动 ===== */
+function bindEvents(){
+  $$('.nav-item').forEach(n=>n.onclick=()=>{go(n.dataset.page);if(window.innerWidth<900)closeSidebar()});
+  $('#refreshBtn').onclick=async()=>{const btn=$('#refreshBtn');btn.classList.add('spin');await fetchNews();setTimeout(()=>btn.classList.remove('spin'),1000)};
+  $('#sidebarToggle').onclick=toggleSidebar;$('#sidebarClose').onclick=closeSidebar;$('#sidebarOverlay').onclick=closeSidebar;
+  $('#btnExport').onclick=exportData;$('#btnImport').onclick=importData;
+  $('#btnSyncOut').onclick=syncExport;$('#btnSyncIn').onclick=syncImport;
+  document.getElementById('imgInput').onchange=handleImageUpload;
+  $('#themeBtn').onclick=cycleTheme;
   document.addEventListener('keydown',e=>{
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
-    const map={1:'morning',2:'english',3:'finance',4:'learn',5:'read',6:'poems',7:'collect',8:'todo'};
-    if(map[e.key]){go(map[e.key]);if(window.innerWidth<860)closeSidebar()}
-    if(e.key==='Escape')closeSidebar();
-    if(e.key==='m'||e.key==='M')toggleSidebar();
+    const map={'1':'todo','2':'morning','3':'english','4':'learn','5':'finance','6':'collect','7':'read'};
+    if(map[e.key]){go(map[e.key]);if(window.innerWidth<900)closeSidebar()}
+    if(e.key==='m'||e.key==='M'||e.key==='Escape'){if(e.key==='Escape')closeSidebar();else toggleSidebar()}
+    if(e.key==='t'||e.key==='T'){$('#themeBtn').click()}
   });
-
-  // 隔30秒更新时钟
-  function tick(){const d=new Date();$('#liveClock').textContent=d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});setTimeout(tick,30000)}
-  tick();
+  if(window.innerWidth>=1200)setTimeout(openSidebar,200);
+  setInterval(()=>{const d=new Date();$('#liveClock').textContent=d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})},30000);
 }
 
 function init(){
   loadData();
+  const savedTheme=ls.get('theme','warm');
+  setTheme(savedTheme);
+  if(!data.news||!data.news.length)data.news=DEFAULT_DATA.news; // 确保默认新闻
   bindEvents();
-  go('morning');
+  go('todo');
   fetchNews();
+  fetchFundValues(); // 自动刷新基金估值
+  const d=new Date();$('#liveClock').textContent=d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
 }
-init();
 
-window.go=go;window.toggleSidebar=toggleSidebar;
-window.tgTodo=tgTodo;window.rmTodo=rmTodo;window.addTodo=addTodo;window.qtTodo=qtTodo;
-window.spkDialogue=spkDialogue;window.scoreDialogue=scoreDialogue;window.addDialogue=addDialogue;
-window.cyLearn=cyLearn;window.addColl=addColl;window.addTx=addTx;
-window.swBook=swBook;window.upBook=upBook;window.addPoem=addPoem;
-window.showExport=showExport;window.showImport=showImport;window.doImport=doImport;window.copyExport=copyExport;
-window.closeExport=closeExport;window.closeImport=closeImport;
+// 暴露
+window.go=go;window.toggleSidebar=toggleSidebar;window.openSidebar=openSidebar;window.closeSidebar=closeSidebar;
+window.toggleTodo=toggleTodo;window.delTodo=delTodo;window.addTodo=addTodo;
+window.quickToggleTodo=quickToggleTodo;window.addNewsManually=addNewsManually;window.toggleNewsForm=toggleNewsForm;
+window.playDictation=playDictation;window.checkDictation=checkDictation;window.changeAccent=changeAccent;window.addEnglishSource=addEnglishSource;window.loadAudioFor=loadAudioFor;window.removeEnglishSource=removeEnglishSource;
+window.cycleLearn=cycleLearn;window.toggleAnswer=toggleAnswer;
+window.addCollect=addCollect;window.addTx=addTx;window.editTx=editTx;window.uploadReceipt=uploadReceipt;window.handleTxReceipt=handleTxReceipt;window.viewReceipt=viewReceipt;window.clearFundImages=clearFundImages;window.bulkImportFunds=bulkImportFunds;
+window.updateBook=updateBook;window.switchBook=switchBook;window.addBook=addBook;window.removeBook=removeBook;window.toggleAddBook=toggleAddBook;window.saveReadingNotes=saveReadingNotes;window.importWereadNotes=importWereadNotes;window.toggleChapter=toggleChapter;window.clearWereadNotes=clearWereadNotes;window.openWeread=openWeread;
+window.toggleArchive=toggleArchive;window.syncExport=syncExport;window.syncImport=syncImport;
+window.editTodo=editTodo;
+
+init();
 </script>
 </body>
 </html>
