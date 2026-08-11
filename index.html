@@ -7,6 +7,11 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Loran · 工作台</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="favicon.svg">
+<meta name="theme-color" content="#2A2419">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 :root{
   --bg:#F2EBDE; --bg-deep:#E8DECC; --paper:#FBF7EE;
@@ -395,7 +400,7 @@ a.news-title{color:var(--blue);cursor:pointer}a.news-title:hover{text-decoration
   background:var(--vermilion);color:var(--paper);white-space:nowrap;
 }
 
-/* ===== 深度学习(模块4) ===== */
+/* ===== 史记(模块4) ===== */
 .learn-cycle{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;justify-content:center}
 .cycle-dot{padding:5px 12px;border-radius:12px;font-size:11px;color:var(--ink-faint);border:1px solid var(--rule);background:var(--paper);letter-spacing:.1em;cursor:pointer;transition:all .2s;min-height:36px;display:flex;align-items:center}
 .cycle-dot.active{background:var(--blue);color:var(--paper);border-color:var(--blue)}
@@ -575,8 +580,7 @@ textarea.text-input{resize:vertical;min-height:60px}
       </div>
       <div class="nav-section">
         <div class="nav-label">修 养</div>
-        <div class="nav-item" data-page="learn"><span class="nav-icon">学</span><span class="nav-text">深度学习</span><span class="nav-kbd">4</span></div>
-        <div class="nav-item" data-page="collect"><span class="nav-icon">藏</span><span class="nav-text">内容沉淀</span><span class="nav-kbd">6</span></div>
+        <div class="nav-item" data-page="learn"><span class="nav-icon">史</span><span class="nav-text">史记</span><span class="nav-kbd">4</span></div>
         <div class="nav-item" data-page="read"><span class="nav-icon">阅</span><span class="nav-text">阅读管理</span><span class="nav-kbd">7</span></div>
       </div>
     </nav>
@@ -593,7 +597,7 @@ textarea.text-input{resize:vertical;min-height:60px}
       <div class="sidebar-foot-row">
         <button class="btn-sm" id="btnCloudPush" title="一键备份到GitHub云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
       </div>
-      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v4.7 · Gist云同步 · 微信直连 · 基金实时</div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.0 · 史记 · 读书修身 · Gist云同步</div>
     </div>
   </aside>
 
@@ -643,9 +647,9 @@ function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').
 /* ===== 默认数据 ===== */
 const DEFAULT_DATA={
   todos:[
-    {id:'t1',text:'整理本周深度学习笔记',done:false,created:today()},
+    {id:'t1',text:'学习史记，一天一篇',done:false,created:today()},
     {id:'t2',text:'基金定投确认扣款',done:false,created:today()},
-    {id:'t3',text:'阅读《置身事内》30 页',done:false,created:today()}
+    {id:'t3',text:'阅读《置身事内》第五章：政府投融资与债务（进度 184/392 页）',done:false,created:today()}
   ],
   news:[
     {id:'n1',title:'央行发布二季度货币政策执行报告',summary:'强调保持流动性合理充裕，加大金融对实体经济支持力度',source:'央行官网',link:'http://www.pbc.gov.cn/',category:'finance',time:'09:30'},
@@ -702,7 +706,7 @@ const DEFAULT_DATA={
     {t:'海内存知己，天涯若比邻。',s:'王勃 · 送杜少府之任蜀州',ctx:'友情送别'}
   ],
   learnIndex:0,
-  learnDomains:['政治','金融','人力资源管理'],
+  learnDomains:['本纪', '世家', '列传'],
   collect:[
     {kind:'idea',kindLabel:'灵感库',title:'一条关于穿搭的收藏',summary:'▸ 3分钟搞定一周穿搭：胶囊衣橱公式3上衣+2下装+1外套，能搭出21套。\n▸ 联想：可整理自己的衣橱单品建立搭配矩阵。',url:'https://v.douyin.com/iRqDemo001/',date:'2026-08-04'},
     {kind:'skill',kindLabel:'技能教程',title:'一份实用技巧：Python自动化',summary:'▸ Python 自动化报表模板：用 openpyxl 批量填表每天省1小时。\n▸ 联想：与工作中重复性任务对照，可形成自己的脚本库。',url:'https://v.douyin.com/iRqDemo003/',date:'2026-08-05'}
@@ -716,23 +720,23 @@ const DEFAULT_DATA={
 };
 
 const LEARN_DB={
-  '政治':[
-    {theory:'三权分立与制衡 — 立法、行政、司法相互制约的设计哲学',case:'美国国会可推翻总统否决，最高法可判法律违宪，形成了世界上最早的现代分权实践。',q:'如果一国行政权力过度膨胀，你认为哪些制衡机制会最先失效？',answer:'司法独立性和媒体自由度通常首当其冲，因为行政部门可通过预算控制和信息管控削弱这两大支柱。',
-     accounts:[{name:'人民日报',tag:'权威·政策',sogou:'rmrbwx'},{name:'侠客岛',tag:'时政·评论',sogou:'xiake_island'},{name:'政事堂',tag:'政经',sogou:'politics01'},{name:'凤凰网评论',tag:'观点·深度',sogou:'ifengpinglun'}]},
-    {theory:'政治周期理论 — 选举周期影响政策制定的时间偏好',case:'在选举年前夕，政府倾向于推出短期刺激政策以提升民意支持率，而在选举后则更可能推行结构改革。',q:'为什么基础设施投资通常在新政府上任第一年启动？',answer:'因为大型基建项目见效慢(3-5年)，第一年启动可在下一届选举前完工，最大化政治收益。',
-     accounts:[{name:'政事堂',tag:'政经',sogou:'politics01'},{name:'FT中文网',tag:'政经·观察',sogou:'FTChinese'},{name:'政见CNPolitics',tag:'学术·深度',sogou:'cnpolitics'}]}
+  '本纪':[
+    {theory:'【秦始皇本纪】始皇既立，并兼六国，销锋铸鐻，以为金人十二。同书文字，治驰道，东穷燕齐，南极吴楚。',case:'【注】秦始皇统一六国后，收天下兵器铸成十二铜人，统一文字为小篆，修筑驰道（古代高速公路）贯通全国。此举奠定了中国大一统的制度基础，"书同文、车同轨"影响至今。',q:'秦统一文字对后世中华文明的意义是什么？',answer:'文字统一使中央政令能下达到全国各地，打破了地域文化壁垒，使"中国"从地理概念变成了文化共同体。此后两千年，虽然朝代更迭、方言各异，但汉字始终是联系中华文明的无形纽带。',
+     accounts:[{name:'中华书局',tag:'经典·古籍',sogou:'zhonghuashuju1912'},{name:'国家人文历史',tag:'人文·深度',sogou:'gjrwls'},{name:'看理想',tag:'文化·评论',sogou:'vistopia'}]},
+    {theory:'【项羽本纪】项王军壁垓下，兵少食尽，夜闻汉军四面皆楚歌，乃大惊曰："汉皆已得楚乎？是何楚人之多也！"',case:'【注】垓下之围，四面楚歌。项羽被困垓下，刘邦命汉军唱楚地歌谣，瓦解楚军士气。项羽以为楚地已被汉军占领，军心崩溃，最终突围至乌江自刎。这是中国历史上最著名的心理战之一。',q:'如果你是项羽，四面楚歌之际会如何应对？',answer:'项羽的问题在于刚愎自用、不善用人。韩信、陈平、英布等人才都从他帐下投奔了刘邦。真正的"破局"不在一战一役，而在于平时能否建立足够的信任和凝聚力。',
+     accounts:[{name:'书单来了',tag:'阅读·推荐',sogou:'shudanlaile'},{name:'为你读诗',tag:'诗词·古风',sogou:'thepoemforyou'}]}
   ],
-  '金融':[
-    {theory:'复利效应 — 第七个馒头的智慧：财富增长的非线性加速',case:'每月定投5000元年化8%，20年后约280万，本金投入仅120万。',q:'为什么大多数人无法坚持长期定投？',answer:'复利的早期回报微乎其微——前5年增长极慢，人类大脑天生偏好即时奖赏，忍耐延迟满足需要极强的纪律性。',
-     accounts:[{name:'远川研究所',tag:'深度·宏观',sogou:'yuancailuohu'},{name:'36氪',tag:'创投·前沿',sogou:'wow36kr'},{name:'虎嗅',tag:'商业·观察',sogou:'huxiu_com'},{name:'银行螺丝钉',tag:'基金定投',sogou:'indexfund'},{name:'格隆汇',tag:'港股·投资',sogou:'gelonghui'}]},
-    {theory:'市场有效性与行为金融 — 市场并非完全理性',case:'2008年金融危机中，评级机构对MBS给出AAA评级，市场集体忽视了尾部风险。',q:'个人投资者如何利用行为偏差获利？',answer:'在市场恐慌时逆势买入优质资产，等待理性回归。但这需要强大的心理承受力和足够的闲置资金。',
-     accounts:[{name:'雪球',tag:'投资者社区',sogou:'xueqiujinghua'},{name:'集思录',tag:'套利·数据',sogou:'jisilu'},{name:'债券圈',tag:'债券·固收',sogou:'zqcaijing'}]}
+  '世家':[
+    {theory:'【孔子世家】太史公曰：《诗》有之："高山仰止，景行行止。"虽不能至，然心乡往之。余读孔氏书，想见其为人。',case:'【注】司马迁在《孔子世家》结尾写下这段话，表达了对孔子的无限敬仰。"高山仰止，景行行止"出自《诗经·小雅》，意为品德像高山一样令人仰望，行为像大路一样让人效仿。司马迁读孔子的书，仿佛看到了他的为人。',q:'为什么司马迁要把孔子列入"世家"（诸侯级别），而非"列传"？',answer:'孔子虽非诸侯，但其思想和教育影响了百代帝王。司马迁以"素王"视之——无冕之王。这一安排本身就是一个历史判断：思想的力量可以超越政治地位。',
+     accounts:[{name:'中华书局',tag:'经典·古籍',sogou:'zhonghuashuju1912'},{name:'理想国imaginist',tag:'人文·出版',sogou:'lixiangguo2013'}]},
+    {theory:'【陈涉世家】陈涉少时，尝与人佣耕，辍耕之垄上，怅恨久之，曰："苟富贵，无相忘。"庸者笑而应曰："若为庸耕，何富贵也？"陈涉太息曰："嗟乎，燕雀安知鸿鹄之志哉！"',case:'【注】陈涉（陈胜）年轻时给人当雇农耕田，在田垄上叹息说："如果将来谁富贵了，不要忘记彼此。"同伴嘲笑他一个雇农怎么可能富贵。陈胜感叹："燕子麻雀怎么能知道大雁天鹅的志向呢？"后来他发动了中国历史上第一次大规模农民起义。',q:'"燕雀安知鸿鹄之志"在今天有什么现实意义？',answer:'这句话提醒我们：不要用自己有限的认知去评判他人的梦想，也不要以别人的标准定义自己的可能性。不过也需自省：光有"鸿鹄之志"不够，陈胜起义六个月即败，说明志向需要匹配能力和规划。',
+     accounts:[{name:'看历史',tag:'历史·思辨',sogou:'kanlishi'},{name:'国家人文历史',tag:'人文·深度',sogou:'gjrwls'}]}
   ],
-  '人力资源管理':[
-    {theory:'双因素理论 — 保健因素消除不满，激励因素产生满意',case:'涨薪只能短暂缓解不满（保健因素），真正驱动绩效的是成就感、认可与成长空间（激励因素）。',q:'远程办公时代，HR如何设计激励因素？',answer:'核心是把"控制"转为"赋能"：明确目标而非监控过程、定期双向反馈、提供学习预算、用异步沟通代替会议。',
-     accounts:[{name:'哈佛商业评论',tag:'管理·前沿',sogou:'hbrchinese'},{name:'领英LinkedIn',tag:'职场·洞察',sogou:'LinkedIn-China'},{name:'中欧国际工商学院',tag:'商学院·思享',sogou:'CEIBSOfficial'},{name:'混沌大学',tag:'创新·认知',sogou:'hundun-university'}]},
-    {theory:'OKR vs KPI — 目标管理工具的选择',case:'Google用OKR驱动创新，传统工厂用KPI管控效率。OKR设定挑战性目标，容许多元路径；KPI关心确定性产出。',q:'销售团队应该用KPI还是OKR？',answer:'短期结果导向(月度销售额)用KPI保持纪律，长期策略(开拓新市场、客户满意度)用OKR激发创新。两者可以并行。',
-     accounts:[{name:'稻盛和夫',tag:'经营哲学',sogou:'daoshenghefu'},{name:'明源云',tag:'地产管理',sogou:'mingyuandichan'}]}
+  '列传':[
+    {theory:'【商君列传】卫鞅曰："治世不一道，便国不法古。故汤武不循古而王，夏殷不易礼而亡。反古者不可非，而循礼者不足多。"',case:'【注】商鞅（公孙鞅）对秦孝公说：治理国家不必遵循一种方法，对国家有利就不必效法古代。商汤、周武王不遵循古制而称王，夏桀、殷纣不改变礼制而灭亡。反对古制的人不应被指责，遵循旧礼的人也不值得称赞。这是商鞅变法的理论宣言。',q:'商鞅变法成功了，但为什么商鞅本人最后被车裂？',answer:'商鞅的悲剧在于：他推动了最激进的制度变革，用法治取代人治，但这触动了所有贵族的利益。秦孝公一死，旧势力立即反扑。所以司马迁说商鞅"天资刻薄"——他太相信制度的力量，忽视了政治中的人性因素。',
+     accounts:[{name:'逻辑思维',tag:'认知·思辨',sogou:'luojisw'},{name:'书单来了',tag:'阅读·推荐',sogou:'shudanlaile'}]},
+    {theory:'【伯夷列传】伯夷、叔齐，孤竹君之二子也。父欲立叔齐，及父卒，叔齐让伯夷。伯夷曰："父命也。"遂逃去。叔齐亦不肯立而逃之。……武王已平殷乱，天下宗周，而伯夷、叔齐耻之，义不食周粟，隐于首阳山，采薇而食之。',case:'【注】伯夷、叔齐是孤竹国君的两个儿子，互相推让君位，双双逃离。后来周武王伐纣，他们认为以臣弑君不义，拒绝吃周朝的粮食，隐居首阳山采野菜为生，最终饿死。司马迁把《伯夷列传》放在列传第一篇，意在追问：好人为什么没有好报？',q:'司马迁为什么要追问"天道无亲，常与善人"这句话？',answer:'伯夷、叔齐品行高洁却饿死；盗跖作恶多端却善终。司马迁借伯夷之口，质疑了"善有善报"的朴素因果关系。这是《史记》最深刻的哲学思考之一：命运并不公平，但正因如此，人的选择才更有分量。',
+     accounts:[{name:'为你读诗',tag:'诗词·古风',sogou:'thepoemforyou'},{name:'看理想',tag:'文化·评论',sogou:'vistopia'}]}
   ]
 };
 
@@ -776,12 +780,11 @@ const PAGE_META={
   todo:{t:'待办管理',m:'—— 日拱一卒，功不唐捐'},
   morning:{t:'晨间汇总',m:'—— 寅时既明，万物初醒'},
   english:{t:'英语学习',m:'—— A little each day, the words will stay'},
-  learn:{t:'深度学习',m:'—— 学而时习之，不亦说乎'},
+  learn:{t:'史记',m:'—— 以史为鉴，可知兴替'},
   finance:{t:'财务记账',m:'—— 量入为出，积少成多'},
-  collect:{t:'内容沉淀',m:'—— 厚积薄发，聚沙成塔'},
-  read:{t:'阅读管理',m:'—— 开卷有益，温故知新'}
+  read:{t:'阅读管理',m:'—— 一日无书，百事荒芜'}
 };
-const PAGES={todo:renderTodo,morning:renderMorning,english:renderEnglish,learn:renderLearn,finance:renderFinance,collect:renderCollect,read:renderRead};
+const PAGES={todo:renderTodo,morning:renderMorning,english:renderEnglish,learn:renderLearn,finance:renderFinance,read:renderRead};
 let curPage='todo';
 function go(p){
   if(!PAGES[p])return;curPage=p;
@@ -1112,13 +1115,13 @@ function removeEnglishSource(i){}
 function playDictation(i){}
 function changeAccent(v){}
 
-/* ===== 4. 深度学习 ===== */
+/* ===== 4. 史记 ===== */
 function renderLearn(){
   const idx=data.learnIndex%DEFAULT_DATA.learnDomains.length;
   const domain=DEFAULT_DATA.learnDomains[idx];
   const items=LEARN_DB[domain];
   const item=items[Math.floor(Math.random()*items.length)];
-  // 精选公众号
+  // 推荐公众号
   const accounts=item.accounts||[];
 
   $('#contentArea').innerHTML=`
@@ -1126,18 +1129,18 @@ function renderLearn(){
       ${DEFAULT_DATA.learnDomains.map((d,i)=>`<button class="cycle-dot ${i===idx?'active':''}" onclick="cycleLearn(${i})">${d}</button>`).join('')}
     </div>
     <div class="learn-card">
-      <div class="learn-domain">领域 · ${domain}</div>
+      <div class="learn-domain">篇目 · ${domain}</div>
       <div class="learn-theory">${item.theory}</div>
-      <div class="learn-case-label">现实案例</div>
+      <div class="learn-case-label">注 释</div>
       <div class="learn-case">${item.case}</div>
-      <div class="learn-case-label">今日思考题</div>
+      <div class="learn-case-label">今日思考</div>
       <div class="learn-q">${item.q}</div>
       ${item.answer?`
-      <button class="btn-ghost" style="margin-top:8px" onclick="toggleAnswer()">查看参考答案</button>
+      <button class="btn-ghost" style="margin-top:8px" onclick="toggleAnswer()">查看参考解读</button>
       <div class="learn-answer" id="learnAnswer">${item.answer}</div>`:''}
       ${accounts.length?`
       <div class="accounts-block">
-        <div class="accounts-title">精选公众号 · ${domain}领域 <span style="font-size:9px;color:var(--ink-faint)">（点击唤起微信）</span></div>
+        <div class="accounts-title">推荐阅读 · ${domain} <span style="font-size:9px;color:var(--ink-faint)">（点击唤起微信）</span></div>
         <div class="accounts-grid">
           ${accounts.map(a=>`<a class="account-chip" href="weixin://dl/business/?t=${encodeURIComponent(a.name)}" title="${a.tag} · 点击打开微信">
             <span class="account-name">${a.name}</span>
@@ -1148,10 +1151,10 @@ function renderLearn(){
       </div>`:''}
     </div>
     <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
-      <button class="btn-ghost" onclick="cycleLearn()">↻ 换一个案例</button>
+      <button class="btn-ghost" onclick="cycleLearn()">↻ 换一篇</button>
       <button class="btn-ghost" onclick="alert('已加入今日学习清单')">★ 收藏</button>
       <button class="btn-ghost" onclick="shareToWechat('${domain}', '${item.theory}')" style="border-color:#07C160;color:#07C160">💬 分享到微信</button>
-      <button class="btn-ghost" onclick="window.open('https://weread.qq.com/web/search?q=${encodeURIComponent(domain)}','_blank')" style="border-color:var(--blue);color:var(--blue)">📚 微信读书</button>
+      <button class="btn-ghost" onclick="window.open('https://weread.qq.com/web/search?q=${encodeURIComponent('史记 '+domain)}','_blank')" style="border-color:var(--blue);color:var(--blue)">📚 搜微信读书</button>
     </div>
     <div id="wechatQrBox" style="display:none;text-align:center;margin-top:16px;padding:16px;background:var(--paper);border-radius:12px;border:1px solid var(--rule)">
       <div style="font-size:13px;margin-bottom:10px;color:var(--ink)">📱 手机扫一扫，在微信中阅读</div>
@@ -1800,7 +1803,7 @@ function bindEvents(){
   $('#themeBtn').onclick=cycleTheme;
   document.addEventListener('keydown',e=>{
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
-    const map={'1':'todo','2':'morning','3':'english','4':'learn','5':'finance','6':'collect','7':'read'};
+    const map={'1':'todo','2':'morning','3':'english','4':'learn','5':'finance','7':'read'};
     if(map[e.key]){go(map[e.key]);if(window.innerWidth<900)closeSidebar()}
     if(e.key==='m'||e.key==='M'||e.key==='Escape'){if(e.key==='Escape')closeSidebar();else toggleSidebar()}
     if(e.key==='t'||e.key==='T'){$('#themeBtn').click()}
