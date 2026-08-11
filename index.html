@@ -1802,7 +1802,8 @@ function bindEvents(){
   $('#sidebarToggle').onclick=toggleSidebar;$('#sidebarClose').onclick=closeSidebar;$('#sidebarOverlay').onclick=closeSidebar;
   $('#btnExport').onclick=exportData;$('#btnImport').onclick=importData;
   $('#btnSyncOut').onclick=syncExport;$('#btnSyncIn').onclick=syncImport;
-  $('#btnCloudPush').onclick=cloudPush;autoCloudCheck();
+  $('#btnCloudPush').onclick=cloudPush;
+  setTimeout(autoCloudCheck,5000);setInterval(autoCloudCheck,90000);
   document.getElementById('imgInput').onchange=handleImageUpload;
   $('#themeBtn').onclick=cycleTheme;
   document.addEventListener('keydown',e=>{
@@ -1920,16 +1921,77 @@ function autoCloudSave(){clearTimeout(_cloudTimer);_cloudTimer=setTimeout(cloudP
 const _origSetItem=Storage.prototype.setItem;
 Storage.prototype.setItem=function(k,v){_origSetItem.call(this,k,v);if(k!=='loran_gh_token')autoCloudSave()};
 
-async function autoCloudCheck(){
-  const token=localStorage.getItem('loran_gh_token');if(!token)return;
-  let hasLocal=false;
-  for(let i=0;i<localStorage.length;i++){if(localStorage.key(i)!=='loran_gh_token'){hasLocal=true;break}}
-  if(hasLocal)return;
+async function fetchCloudData(){
+  const token=localStorage.getItem('loran_gh_token');if(!token)return null;
   const url=`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
   try{
     const r=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}});
-    if(r.ok){const d=await r.json();const cloud=JSON.parse(decodeURIComponent(escape(atob(d.content))));for(const k in cloud)localStorage.setItem(k,cloud[k]);location.reload()}
-  }catch(e){}
+    if(r.status===401||r.status===403){localStorage.removeItem('loran_gh_token');return null}
+    if(!r.ok)return null;
+    const d=await r.json();
+    return JSON.parse(decodeURIComponent(escape(atob(d.content))));
+  }catch(e){return null}
+}
+
+// 把云端对象合并入 localStorage（books 按 title 去重，其它字段仅在本地为空时采用云端）
+function mergeCloudIntoLocal(cloud){
+  if(!cloud)return [];
+  const changes=[];
+  for(const k in cloud){
+    if(k==='loran_gh_token')continue;
+    const local=localStorage.getItem(k);
+    const cv=cloud[k];
+    if(k==='loran_books'){
+      try{
+        const localBooks=local?JSON.parse(local):[];
+        const cloudBooks=JSON.parse(cv);
+        const titleSet=new Set(localBooks.map(b=>b.title));
+        const newTitles=[];
+        for(const cb of cloudBooks){
+          if(!titleSet.has(cb.title)){localBooks.push(cb);newTitles.push(cb.title);titleSet.add(cb.title)}
+        }
+        if(newTitles.length){
+          localStorage.setItem('loran_books',JSON.stringify(localBooks));
+          changes.push({type:'books_added',titles:newTitles});
+        }
+      }catch(e){}
+      continue;
+    }
+    // 其它字段：本地为空时用云端，避免覆盖本地修改
+    const isEmpty=!local||local==='null'||local==='[]'||local==='{}';
+    if(isEmpty&&cv&&cv!=='null'){
+      localStorage.setItem(k,cv);
+      changes.push({type:'field_adopted',key:k});
+    }
+  }
+  return changes;
+}
+
+async function autoCloudCheck(){
+  const cloud=await fetchCloudData();
+  if(!cloud)return;
+  const changes=mergeCloudIntoLocal(cloud);
+  if(!changes.length)return;
+  // 把变化同步进内存 data 并刷新阅读面板
+  try{data.books=ls.get('books',DEFAULT_DATA.books)}catch(e){}
+  try{data.readingIndex=ls.get('readingIndex',DEFAULT_DATA.readingIndex)}catch(e){}
+  if(typeof renderRead==='function')renderRead();
+  // 顶部状态条提示
+  const status=$('#statusBadge');
+  const bookChg=changes.find(c=>c.type==='books_added');
+  if(status){
+    if(bookChg){
+      status.textContent='✓ 合并 +'+bookChg.titles.length+' 本';
+      setTimeout(()=>{if(status.textContent.indexOf('合并')>=0)status.textContent='● 实时'},5000);
+    }else{
+      status.textContent='✓ 已合并';
+      setTimeout(()=>{if(status.textContent.indexOf('合并')>=0)status.textContent='● 实时'},5000);
+    }
+  }
+  // 有内容变更→把合并结果立即回传，避免被云端旧版本覆盖
+  if(bookChg||changes.some(c=>c.type==='field_adopted')){
+    setTimeout(cloudPush,2000);
+  }
 }
 
 init();
