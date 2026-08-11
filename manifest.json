@@ -6,8 +6,8 @@
   "scope": "/loran-workbench/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#2A2419",
-  "theme_color": "#2A2419",
+  "background_color": "#6BAED6",
+  "theme_color": "#6BAED6",
   "icons": [
     {
       "src": "icon-192.png",
