@@ -580,6 +580,7 @@ textarea.text-input{resize:vertical;min-height:60px}
         <div class="nav-label">日 常</div>
         <div class="nav-item" data-page="morning"><span class="nav-icon">晨</span><span class="nav-text">晨间汇总</span><span class="nav-kbd">2</span></div>
         <div class="nav-item" data-page="english"><span class="nav-icon">英</span><span class="nav-text">英语学习</span><span class="nav-kbd">3</span></div>
+        <div class="nav-item" data-page="englishResources"><span class="nav-icon">源</span><span class="nav-text">英语资源</span><span class="nav-kbd">8</span></div>
         <div class="nav-item" data-page="finance"><span class="nav-icon">账</span><span class="nav-text">财务记账</span><span class="nav-kbd">5</span></div>
       </div>
       <div class="nav-section">
@@ -601,7 +602,7 @@ textarea.text-input{resize:vertical;min-height:60px}
       <div class="sidebar-foot-row">
         <button class="btn-sm" id="btnCloudPush" title="一键备份到GitHub云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
       </div>
-      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.0 · 史记 · 读书修身 · 仓库云同步</div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.1 · 史记 · 读书修身 · 仓库云同步</div>
     </div>
   </aside>
 
@@ -627,8 +628,8 @@ textarea.text-input{resize:vertical;min-height:60px}
     </header>
     <div class="content"><div class="container" id="contentArea"></div></div>
     <div class="foot-strip">
-      <span>按 1-7 切换模块 · 数据本地持久化</span>
-      <span>&copy; Loran · 工作台 v4.3</span>
+      <span>按 1-8 切换模块 · 数据本地持久化</span>
+      <span>&copy; Loran · 工作台 v5.1</span>
     </div>
   </main>
 </div>
@@ -643,6 +644,10 @@ const ls={
   get:(k,d)=>{try{const v=localStorage.getItem('loran_'+k);return v?JSON.parse(v):d}catch(e){return d}},
   set:(k,v)=>{try{localStorage.setItem('loran_'+k,JSON.stringify(v))}catch(e){}}
 };
+/* ===== 同步元数据：记录每个模块的最后改动时间（用于多端按模块合并） ===== */
+const SYNC_META_KEY='loran_sync_meta';
+function loadSyncMeta(){try{return JSON.parse(localStorage.getItem(SYNC_META_KEY))||{}}catch(e){return {}}}
+function saveSyncMeta(m){try{localStorage.setItem(SYNC_META_KEY,JSON.stringify(m))}catch(e){}}
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const formatTime=()=>{const d=new Date();return `${String(d.getMonth()+1).padStart(2,'0')}月${String(d.getDate()).padStart(2,'0')}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
 function safeHref(url){if(!url)return'#';const u=String(url).trim();if(/^https?:\/\//i.test(u)||/^douyin:\/\//i.test(u))return u;if(/^\/\//i.test(u))return'https:'+u;return'#';}
@@ -673,6 +678,12 @@ const DEFAULT_DATA={
     {id:'e8',text:'Let me show you how to order coffee in a real American cafe.',hint:'生活·点单',difficulty:2},
     {id:'e9',text:'I was wondering if you could recommend a good restaurant nearby.',hint:'生活·社交',difficulty:2},
     {id:'e10',text:'Check-in for flight 731 to London is now open at gate 24.',hint:'生活·旅行',difficulty:2},
+  ],
+  englishResources:[
+    {id:'er1',title:'TED 演讲',url:'https://www.ted.com/talks',note:'TED 官方演讲视频，练听力与表达'},
+    {id:'er2',title:'BBC Learning English',url:'https://www.bbc.co.uk/learningenglish',note:'BBC 官方英语学习，地道英音'},
+    {id:'er3',title:'YouGlish',url:'https://youglish.com',note:'输入单词/句子，听真实语境发音视频'},
+    {id:'er4',title:'每日英语听力',url:'https://dict.eudic.net',note:'欧路词典配套，海量听力资源'}
   ],
   vocabulary:[],  // {word,context,sentenceId,added,reviewCount,nextReview:null,mastered:false}
   englishPracticeHistory:[], // {date, sentenceId, score}
@@ -710,6 +721,8 @@ const DEFAULT_DATA={
     {t:'海内存知己，天涯若比邻。',s:'王勃 · 送杜少府之任蜀州',ctx:'友情送别'}
   ],
   learnIndex:0,
+  learnSeqIndex:0,
+  learnDate:'',
   learnDomains:['本纪', '世家', '列传'],
   collect:[
     {kind:'idea',kindLabel:'灵感库',title:'一条关于穿搭的收藏',summary:'▸ 3分钟搞定一周穿搭：胶囊衣橱公式3上衣+2下装+1外套，能搭出21套。\n▸ 联想：可整理自己的衣橱单品建立搭配矩阵。',url:'https://v.douyin.com/iRqDemo001/',date:'2026-08-04'},
@@ -743,6 +756,9 @@ const LEARN_DB={
      accounts:[{name:'为你读诗',tag:'诗词·古风',sogou:'thepoemforyou'},{name:'看理想',tag:'文化·评论',sogou:'vistopia'}]}
   ]
 };
+/* 史记「一天一篇」固定顺序序列：跨本纪/世家/列传循环 */
+const LEARN_SEQ=[];
+for(const _d of Object.keys(LEARN_DB)){for(const _it of LEARN_DB[_d])LEARN_SEQ.push({domain:_d,item:_it})}
 
 /* ===== 数据层 ===== */
 let data={};
@@ -755,6 +771,7 @@ function loadData(){
     englishPracticeHistory:ls.get('englishPracticeHistory',DEFAULT_DATA.englishPracticeHistory),
     englishScoreAvg:ls.get('englishScoreAvg',DEFAULT_DATA.englishScoreAvg),
     englishReviewQueue:ls.get('englishReviewQueue',DEFAULT_DATA.englishReviewQueue),
+    englishResources:ls.get('englishResources',DEFAULT_DATA.englishResources),
     englishAccent:ls.get('englishAccent',DEFAULT_DATA.englishAccent),
     dailySentence:ls.get('dailySentence',DEFAULT_DATA.dailySentence),
     funds:ls.get('funds',DEFAULT_DATA.funds),
@@ -763,32 +780,49 @@ function loadData(){
     readingIndex:ls.get('readingIndex',DEFAULT_DATA.readingIndex),
     poems:ls.get('poems',DEFAULT_DATA.poems),
     learnIndex:ls.get('learnIndex',DEFAULT_DATA.learnIndex),
+    learnSeqIndex:ls.get('learnSeqIndex',0),
+    learnDate:ls.get('learnDate',''),
     collect:ls.get('collect',DEFAULT_DATA.collect),
     finance:ls.get('finance',DEFAULT_DATA.finance),
     transactions:ls.get('transactions',DEFAULT_DATA.transactions)
   };
 }
+/* 保存全部模块：只给「值发生变化」的模块打时间戳，供多端按模块合并 */
 function saveAll(){
-  ls.set('todos',data.todos); ls.set('news',data.news);
-  ls.set('english',data.english); ls.set('vocabulary',data.vocabulary);
-  ls.set('englishPracticeHistory',data.englishPracticeHistory); ls.set('englishScoreAvg',data.englishScoreAvg);
-  ls.set('englishReviewQueue',data.englishReviewQueue); ls.set('englishAccent',data.englishAccent);
-  ls.set('dailySentence',data.dailySentence);
-  ls.set('funds',data.funds); ls.set('fundImages',data.fundImages);
-  ls.set('books',data.books); ls.set('readingIndex',data.readingIndex); ls.set('poems',data.poems); ls.set('learnIndex',data.learnIndex);
-  ls.set('collect',data.collect); ls.set('finance',data.finance);
-  ls.set('transactions',data.transactions);
+  const now=Date.now();
+  const meta=loadSyncMeta();
+  const write=(key,val)=>{
+    const lsKey='loran_'+key;
+    try{
+      const prev=localStorage.getItem(lsKey);
+      const next=JSON.stringify(val);
+      if(prev!==next){localStorage.setItem(lsKey,next);meta[key]=now;}
+    }catch(e){}
+  };
+  write('todos',data.todos); write('news',data.news);
+  write('english',data.english); write('vocabulary',data.vocabulary);
+  write('englishPracticeHistory',data.englishPracticeHistory); write('englishScoreAvg',data.englishScoreAvg);
+  write('englishReviewQueue',data.englishReviewQueue); write('englishResources',data.englishResources);
+  write('englishAccent',data.englishAccent);
+  write('dailySentence',data.dailySentence);
+  write('funds',data.funds); write('fundImages',data.fundImages);
+  write('books',data.books); write('readingIndex',data.readingIndex); write('poems',data.poems); write('learnIndex',data.learnIndex);
+  write('learnSeqIndex',data.learnSeqIndex); write('learnDate',data.learnDate);
+  write('collect',data.collect); write('finance',data.finance);
+  write('transactions',data.transactions);
+  saveSyncMeta(meta);
 }
 
 const PAGE_META={
   todo:{t:'待办管理',m:'—— 日拱一卒，功不唐捐'},
   morning:{t:'晨间汇总',m:'—— 寅时既明，万物初醒'},
   english:{t:'英语学习',m:'—— A little each day, the words will stay'},
+  englishResources:{t:'英语资源',m:'—— 博采众长，为我所用'},
   learn:{t:'史记',m:'—— 以史为鉴，可知兴替'},
   finance:{t:'财务记账',m:'—— 量入为出，积少成多'},
   read:{t:'阅读管理',m:'—— 一日无书，百事荒芜'}
 };
-const PAGES={todo:renderTodo,morning:renderMorning,english:renderEnglish,learn:renderLearn,finance:renderFinance,read:renderRead};
+const PAGES={todo:renderTodo,morning:renderMorning,english:renderEnglish,englishResources:renderEnglishResources,learn:renderLearn,finance:renderFinance,read:renderRead};
 let curPage='todo';
 function go(p){
   if(!PAGES[p])return;curPage=p;
@@ -1010,6 +1044,13 @@ function renderEnglish(){
           <button class="btn-ghost" onclick="playSentence('${practiceSentence.id}')" style="margin-bottom:8px">🔊 听句子</button>
           <span style="font-size:10px;color:var(--ink-faint);margin-left:8px">点击播放后，在下方写出你听到的内容</span>
         </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center">
+          <span style="font-size:10px;color:var(--ink-faint)">学习资源：</span>
+          ${practiceSentence.url?`<a class="en-res-link" href="${escHtml(safeHref(practiceSentence.url))}" target="_blank" rel="noopener noreferrer">📺 视频/资料</a>`:''}
+          <a class="en-res-link" href="https://youglish.com/pronounce/${encodeURIComponent(practiceSentence.text)}/english" target="_blank" rel="noopener noreferrer">🔊 发音视频</a>
+          <a class="en-res-link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(practiceSentence.text)}" target="_blank" rel="noopener noreferrer">▶ YouTube</a>
+          <a class="en-res-link" href="https://search.bilibili.com/all?keyword=${encodeURIComponent(practiceSentence.text)}" target="_blank" rel="noopener noreferrer">📺 B站</a>
+        </div>
         <div class="practice-input-row">
           <input class="text-input" id="enPracticeInput" placeholder="听到什么就写什么……" onkeydown="if(event.key==='Enter')submitPractice('${practiceSentence.id}')" autocomplete="off" />
           <button class="btn-ghost" style="background:var(--blue);color:var(--paper);border:none;min-width:70px" onclick="submitPractice('${practiceSentence.id}')">✓ 提交</button>
@@ -1029,6 +1070,7 @@ function renderEnglish(){
             <option value="1">⭐ 简单</option><option value="2">⭐⭐ 中等</option><option value="3">⭐⭐⭐ 困难</option>
           </select>
         </div>
+        <input class="text-input" id="newSentenceUrl" placeholder="视频/网址链接（可选，如 YouTube/B站 讲解视频）" />
         <button class="btn-ghost" style="background:var(--blue);color:var(--paper);border:none;justify-self:start" onclick="addSentence()">＋ 添加</button>
       </div>
     </div>
@@ -1110,7 +1152,7 @@ function submitPractice(id){
 function speakWord(i){const v=data.vocabulary[i];if(!v)return;const u=new SpeechSynthesisUtterance(v.word);u.lang=data.englishAccent||'en-US';speechSynthesis.cancel();speechSynthesis.speak(u)}
 function markMastered(i){data.vocabulary[i].mastered=true;saveAll();renderEnglish()}
 function delVocab(i){data.vocabulary.splice(i,1);saveAll();renderEnglish()}
-function addSentence(){const text=$('#newSentenceText').value.trim();const hint=$('#newSentenceHint').value.trim()||'自定义';const diff=parseInt($('#newSentenceDiff').value)||1;if(!text){alert('请输入英文句子');return}const id='e'+Date.now();data.english.unshift({id,text,hint,difficulty:diff});saveAll();renderEnglish()}
+function addSentence(){const text=$('#newSentenceText').value.trim();const hint=$('#newSentenceHint').value.trim()||'自定义';const diff=parseInt($('#newSentenceDiff').value)||1;const url=$('#newSentenceUrl').value.trim()||'';if(!text){alert('请输入英文句子');return}const id='e'+Date.now();data.english.unshift({id,text,hint,difficulty:diff,url});saveAll();renderEnglish()}
 function goReview(id){const s=data.english.find(x=>x.id===id);if(!s)return;s.nextReview=Date.now()-1000;saveAll();renderEnglish()}
 function checkDictation(i){}
 function addEnglishSource(){}
@@ -1119,21 +1161,70 @@ function removeEnglishSource(i){}
 function playDictation(i){}
 function changeAccent(v){}
 
+/* ===== 3.5 英语学习资源库 ===== */
+function renderEnglishResources(){
+  const res=data.englishResources||[];
+  $('#contentArea').innerHTML=`
+    <div class="card">
+      <div class="card-header"><div class="card-title">＋ 添加学习资源</div><span class="card-tag">收藏网站 / 视频链接</span></div>
+      <div style="display:grid;gap:8px">
+        <input class="text-input" id="erTitle" placeholder="资源名称，如：TED 演讲 / 某期视频" />
+        <input class="text-input" id="erUrl" placeholder="网址，如 https://..." />
+        <input class="text-input" id="erNote" placeholder="一句话说明（可选）" />
+        <button class="btn-ghost" style="background:var(--blue);color:var(--paper);border:none;justify-self:start" onclick="addEnglishResource()">＋ 添加</button>
+      </div>
+    </div>
+    ${res.length?`
+    <div class="card">
+      <div class="card-header"><div class="card-title">📚 学习资源库</div><span class="card-tag">${res.length} 个</span></div>
+      ${res.map(r=>`
+        <div class="collect-item">
+          <div class="collect-title">${escHtml(r.title)}</div>
+          ${r.note?`<div style="font-size:11px;color:var(--ink-soft);margin-bottom:4px">${escHtml(r.note)}</div>`:''}
+          <div class="collect-meta">
+            <span style="word-break:break-all">${escHtml(r.url)}</span>
+            ${safeHref(r.url)!=='#'?`<a class="news-link" href="${escHtml(safeHref(r.url))}" target="_blank" rel="noopener noreferrer">打开 ↗</a>`:''}
+            <button class="btn-ghost" style="font-size:10px;padding:2px 8px;color:var(--vermilion)" onclick="delEnglishResource('${r.id}')">删除</button>
+          </div>
+        </div>`).join('')}
+    </div>`:'<div class="card"><div class="empty-tip">还没有收藏资源，先添加一个吧</div></div>'}
+  `;
+}
+function addEnglishResource(){
+  const title=$('#erTitle').value.trim(),url=$('#erUrl').value.trim(),note=$('#erNote').value.trim();
+  if(!title||!url){alert('请填写名称和网址');return}
+  if(!data.englishResources)data.englishResources=[];
+  data.englishResources.unshift({id:'er'+Date.now(),title,url,note});
+  saveAll();renderEnglishResources();
+  $('#erTitle').value='';$('#erUrl').value='';$('#erNote').value='';
+}
+function delEnglishResource(id){
+  data.englishResources=(data.englishResources||[]).filter(x=>x.id!==id);
+  saveAll();renderEnglishResources();
+}
+
 /* ===== 4. 史记 ===== */
 function renderLearn(){
-  const idx=data.learnIndex%DEFAULT_DATA.learnDomains.length;
-  const domain=DEFAULT_DATA.learnDomains[idx];
-  const items=LEARN_DB[domain];
-  const item=items[Math.floor(Math.random()*items.length)];
-  // 推荐公众号
+  // —— 每天固定一篇，按顺序推进（learnDate 记录今日篇目，隔天自动 +1）——
+  const todayStr=today();
+  if(data.learnDate!==todayStr){
+    if(!data.learnDate||typeof data.learnSeqIndex!=='number'||isNaN(data.learnSeqIndex))data.learnSeqIndex=0;
+    else data.learnSeqIndex=(data.learnSeqIndex+1)%LEARN_SEQ.length;
+    data.learnDate=todayStr;
+    saveAll();
+  }
+  const seq=LEARN_SEQ[data.learnSeqIndex%LEARN_SEQ.length]||LEARN_SEQ[0];
+  const domain=seq.domain;
+  const item=seq.item;
+  const seqNo=((data.learnSeqIndex%LEARN_SEQ.length)||0)+1;
   const accounts=item.accounts||[];
 
   $('#contentArea').innerHTML=`
     <div class="learn-cycle">
-      ${DEFAULT_DATA.learnDomains.map((d,i)=>`<button class="cycle-dot ${i===idx?'active':''}" onclick="cycleLearn(${i})">${d}</button>`).join('')}
+      ${DEFAULT_DATA.learnDomains.map((d,i)=>`<button class="cycle-dot ${d===domain?'active':''}" onclick="cycleLearn('${d}')">${d}</button>`).join('')}
     </div>
     <div class="learn-card">
-      <div class="learn-domain">篇目 · ${domain}</div>
+      <div class="learn-domain">第 ${seqNo}/${LEARN_SEQ.length} 篇 · ${domain}</div>
       <div class="learn-theory">${item.theory}</div>
       <div class="learn-case-label">注 释</div>
       <div class="learn-case">${item.case}</div>
@@ -1155,11 +1246,13 @@ function renderLearn(){
       </div>`:''}
     </div>
     <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
-      <button class="btn-ghost" onclick="cycleLearn()">↻ 换一篇</button>
+      <button class="btn-ghost" onclick="cycleLearn(-1)">◀ 上一篇</button>
+      <button class="btn-ghost" onclick="cycleLearn()">▶ 下一篇</button>
       <button class="btn-ghost" onclick="alert('已加入今日学习清单')">★ 收藏</button>
       <button class="btn-ghost" onclick="shareToWechat('${domain}', '${item.theory}')" style="border-color:#07C160;color:#07C160">💬 分享到微信</button>
       <button class="btn-ghost" onclick="window.open('https://weread.qq.com/web/search?q=${encodeURIComponent('史记 '+domain)}','_blank')" style="border-color:var(--blue);color:var(--blue)">📚 搜微信读书</button>
     </div>
+    <div style="text-align:center;font-size:10px;color:var(--ink-faint);margin-top:12px;letter-spacing:.06em">今日已固定 · 每天自动推进一篇 · 明天见</div>
     <div id="wechatQrBox" style="display:none;text-align:center;margin-top:16px;padding:16px;background:var(--paper);border-radius:12px;border:1px solid var(--rule)">
       <div style="font-size:13px;margin-bottom:10px;color:var(--ink)">📱 手机扫一扫，在微信中阅读</div>
       <img id="wechatQrImg" style="width:180px;height:180px;border-radius:8px" alt="微信扫码" />
@@ -1168,7 +1261,22 @@ function renderLearn(){
     </div>
   `;
 }
-function cycleLearn(i){if(typeof i==='number')data.learnIndex=i;else data.learnIndex=(data.learnIndex+1)%DEFAULT_DATA.learnDomains.length;saveAll();renderLearn()}
+function cycleLearn(v){
+  if(typeof v==='string'){
+    // 点击领域标签：跳到该领域「接下来」的一篇
+    const start=data.learnSeqIndex||0;
+    for(let k=1;k<=LEARN_SEQ.length;k++){
+      const idx=(start+k)%LEARN_SEQ.length;
+      if(LEARN_SEQ[idx].domain===v){data.learnSeqIndex=idx;break}
+    }
+  }else if(v===-1||v==='-1'){
+    data.learnSeqIndex=(((data.learnSeqIndex||0)-1)+LEARN_SEQ.length)%LEARN_SEQ.length;
+  }else{
+    data.learnSeqIndex=((data.learnSeqIndex||0)+1)%LEARN_SEQ.length;
+  }
+  data.learnDate=today();
+  saveAll();renderLearn();
+}
 function toggleAnswer(){document.getElementById('learnAnswer').classList.toggle('open')}
 function shareToWechat(domain,theory){
   const box=document.getElementById('wechatQrBox');
@@ -1188,19 +1296,30 @@ function shareToWechat(domain,theory){
 
 /* ===== 5. 财务记账 ===== */
 function renderFinance(){
-  const spend=data.finance.spent||0;
   const budget=data.finance.budget||2000;
-  const pct=Math.min(100,Math.round((spend/budget)*100));
-  const remain=budget-spend;
   const txs=data.transactions||[];
   const images=data.fundImages||[];
+  // —— 本月支出统计（按类目），以真实流水为准（更智能）——
+  const monthPrefix=today().slice(0,7);
+  const monthTxs=txs.filter(t=>t.out&&(t.date||'').startsWith(monthPrefix));
+  const monthTotal=monthTxs.reduce((s,t)=>s+(t.amt||0),0);
+  const spend=monthTxs.length?monthTotal:(data.finance.spent||0);
+  const pct=Math.min(100,Math.round((spend/budget)*100));
+  const remain=budget-spend;
+  const byCat={};
+  monthTxs.forEach(t=>{const c=t.cat||'杂';byCat[c]=(byCat[c]||0)+t.amt});
+  const catKeys=Object.keys(byCat).sort((a,b)=>byCat[b]-byCat[a]);
+  const maxCat=catKeys.length?Math.max(...catKeys.map(c=>byCat[c])):1;
+  const _nowD=new Date();
+  const _lastDay=new Date(_nowD.getFullYear(),_nowD.getMonth()+1,0).getDate();
+  const daysLeft=Math.max(0,_lastDay-_nowD.getDate());
 
   $('#contentArea').innerHTML=`
     <!-- 快速记账（置顶） -->
     <div class="card">
       <div class="card-header"><div class="card-title">快速记账</div></div>
       <div style="display:grid;grid-template-columns:55px 1fr 90px 60px;gap:6px;margin-bottom:6px">
-        <input id="txCat" placeholder="类目" maxlength="2" style="padding:8px 6px;font-size:14px;border:1px solid var(--rule);border-radius:6px;outline:none;font-family:inherit;background:var(--paper);min-height:44px;text-align:center" />
+        <input id="txCat" placeholder="留空自动" maxlength="2" style="padding:8px 6px;font-size:14px;border:1px solid var(--rule);border-radius:6px;outline:none;font-family:inherit;background:var(--paper);min-height:44px;text-align:center" />
         <input id="txName" placeholder="备注" style="font-size:14px;border:1px solid var(--rule);border-radius:6px;outline:none;font-family:inherit;background:var(--paper);min-height:44px;padding:0 10px" />
         <input id="txAmt" type="number" placeholder="¥金额" style="font-size:14px;border:1px solid var(--rule);border-radius:6px;outline:none;font-family:inherit;background:var(--paper);min-height:44px;padding:0 8px" />
         <button class="btn-ghost" style="background:var(--blue);color:var(--paper);border:none;min-height:44px;font-size:12px;padding:0 8px" onclick="addTx()">＋记</button>
@@ -1218,6 +1337,27 @@ function renderFinance(){
       <div class="fin-card"><div class="fin-lbl">本月支出</div><div class="fin-num pos">¥ ${spend.toLocaleString()}</div><div class="fin-sub">${pct}% Used</div><div class="budget-bar"><div class="budget-fill" style="width:${pct}%"></div></div></div>
       <div class="fin-card"><div class="fin-lbl">剩余可支配</div><div class="fin-num ${remain<0?'neg':'pos'}">¥ ${Math.abs(remain).toLocaleString()}</div><div class="fin-sub">${remain<0?'超支':'自由分配'}</div></div>
     </div>
+
+    <!-- 预算预警 -->
+    ${spend>budget?`
+    <div class="card" style="border-left:3px solid var(--vermilion);background:rgba(184,74,56,.05)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:22px">🚨</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--vermilion)">本月已超支 ¥ ${(spend-budget).toLocaleString()}</div>
+          <div style="font-size:11px;color:var(--ink-soft)">预算 ¥ ${budget.toLocaleString()}，已支出 ¥ ${spend.toLocaleString()}。建议暂停非必要开支，或调整预算。</div>
+        </div>
+      </div>
+    </div>`:spend>=budget*0.8?`
+    <div class="card" style="border-left:3px solid var(--gold);background:rgba(176,138,78,.06)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:22px">⚠️</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--gold)">预算已用 ${pct}%，剩余 ¥ ${(budget-spend).toLocaleString()}</div>
+          <div style="font-size:11px;color:var(--ink-soft)">距月底还有 ${daysLeft} 天，日均可用约 ¥ ${daysLeft?Math.max(0,Math.round((budget-spend)/daysLeft)):0}</div>
+        </div>
+      </div>
+    </div>`:''}
 
     <!-- 最近流水 -->
     ${txs.length?`
@@ -1243,6 +1383,19 @@ function renderFinance(){
       </div>
     </div>`:''}
 
+    <!-- 本月支出统计 -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">本月支出统计</div><span class="card-tag">${monthTxs.length} 笔 · ¥ ${monthTotal.toLocaleString()}</span></div>
+      ${catKeys.length?catKeys.slice(0,8).map(c=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:5px 0">
+          <div class="tx-cat" style="width:26px;height:26px;font-size:11px">${escHtml(c)}</div>
+          <div style="flex:1;height:16px;background:var(--bg-deep);border-radius:6px;overflow:hidden">
+            <div style="width:${Math.round(byCat[c]/maxCat*100)}%;height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));border-radius:6px;transition:width .6s"></div>
+          </div>
+          <div style="font-family:Georgia;font-size:12px;font-weight:600;min-width:70px;text-align:right">¥ ${byCat[c].toLocaleString()}</div>
+        </div>`).join(''):'<div class="empty-tip">本月还没有支出记录，记一笔吧</div>'}
+    </div>
+
     <!-- 批量录入基金 -->
     <div class="card">
       <div class="card-header">
@@ -1264,7 +1417,8 @@ function renderFinance(){
       <div class="card-header">
         <div class="card-title">基金估值</div>
         <span class="card-tag">${today()}</span>
-        <button class="btn-ghost" style="font-size:11px;padding:2px 8px" onclick="fetchFundValues()" title="从新浪财经拉取实时估值">↻ 刷新估值</button>
+        <span id="fundStatusTag" style="font-size:10px;color:var(--ink-faint)">实时估值</span>
+        <button class="btn-ghost" style="font-size:11px;padding:2px 8px" onclick="fetchFundValues()" title="从天天基金拉取实时估值，失败自动回退新浪">↻ 刷新估值</button>
       </div>
       ${(()=>{
         const totalAmount=data.funds.reduce((s,f)=>s+(f.amount||0),0);
@@ -1274,7 +1428,7 @@ function renderFinance(){
         <div class="fund-summary-row">
           <div><div style="font-size:10px;color:var(--ink-faint)">总持仓</div><div style="font-family:Georgia,serif;font-size:18px;color:var(--ink);font-weight:600">¥ ${totalAmount.toLocaleString(undefined,{maximumFractionDigits:2})}</div></div>
           <div><div style="font-size:10px;color:var(--ink-faint)">累计收益</div><div style="font-family:Georgia,serif;font-size:18px;color:${totalGain>=0?'var(--vermilion)':'var(--jade)'};font-weight:600">${totalGain>=0?'+':''}¥ ${totalGain.toFixed(2)}</div></div>
-          <div><div style="font-size:10px;color:var(--ink-faint)">昨日收益</div><div style="font-family:Georgia,serif;font-size:18px;color:${totalDaily>=0?'var(--vermilion)':'var(--jade)'};font-weight:600">${totalDaily>=0?'+':''}¥ ${totalDaily.toFixed(2)}</div></div>
+          <div><div style="font-size:10px;color:var(--ink-faint)">今日估值</div><div style="font-family:Georgia,serif;font-size:18px;color:${totalDaily>=0?'var(--vermilion)':'var(--jade)'};font-weight:600">${totalDaily>=0?'+':''}¥ ${totalDaily.toFixed(2)}</div></div>
         </div>
         <div style="border-top:1px dashed var(--rule);margin:10px 0 0"></div>
         `;
@@ -1287,7 +1441,7 @@ function renderFinance(){
           </div>
           <div class="fund-est ${(f.daily||0)>=0?'up':'dn'}" style="text-align:right">
             <div style="font-size:16px">${(f.daily||0)>=0?'+':''}${(f.daily||0).toFixed(2)}</div>
-            <div style="font-size:9px;color:var(--ink-faint);margin-top:1px">${f.currentNav?`净值 ${f.currentNav.toFixed(4)} · `:''}昨日</div>
+            <div style="font-size:9px;color:var(--ink-faint);margin-top:1px">${f.gztime?('估值 '+(f.gszzl>=0?'+':'')+f.gszzl+'% · '+f.gztime):(f.currentNav?('净值 '+f.currentNav.toFixed(4)+' · 昨'):'估值更新中')}</div>
           </div>
         </div>
       `).join('')}
@@ -1300,9 +1454,31 @@ function renderFinance(){
     </div>
   `;
 }
+/* 记账智能分类：根据备注关键词自动归类 */
+const TX_CAT_RULES=[
+  {cat:'食',kw:['早餐','午餐','晚餐','早午','夜宵','咖啡','奶茶','外卖','餐厅','食堂','饭','菜','吃','水果','零食','买菜','超市','便利店','面包','火锅','烧烤','便当','麦当劳','肯德基']},
+  {cat:'行',kw:['地铁','公交','打车','滴滴','出租','高铁','火车','机票','加油','停车','单车','通勤','车票','过路','共享']},
+  {cat:'购',kw:['淘宝','京东','拼多多','天猫','购物','买','衣服','鞋','包','化妆品','数码','快递','日用品','家电','小米','苹果']},
+  {cat:'学',kw:['书','课程','课','培训','报名','学费','资料','知识','会员','笔记','考研','考试','得到']},
+  {cat:'娱',kw:['电影','游戏','KTV','演唱会','视频','景区','门票','旅行','旅游','健身','球']},
+  {cat:'医',kw:['药','医院','挂号','体检','诊所','看病','医保','牙','处方']},
+  {cat:'房',kw:['房租','水电','燃气','物业','房贷','水费','电费','维修']},
+  {cat:'通',kw:['话费','流量','宽带','手机','网费','充值']},
+  {cat:'礼',kw:['红包','礼金','礼物','请客','份子','结婚','随礼','转账']},
+  {cat:'杂',kw:[]}
+];
+function autoCat(name){
+  const n=String(name||'');
+  for(const r of TX_CAT_RULES){
+    if(r.kw.some(k=>n.toLowerCase().includes(k)))return r.cat;
+  }
+  return '';
+}
 function addTx(){
-  const cat=$('#txCat').value||'杂',name=$('#txName').value.trim(),amt=parseFloat($('#txAmt').value);
+  let cat=$('#txCat').value.trim();
+  const name=$('#txName').value.trim(),amt=parseFloat($('#txAmt').value);
   if(!name||!amt){alert('请填写备注和金额');return}
+  if(!cat)cat=autoCat(name)||'杂';
   data.transactions.unshift({id:'tx'+Date.now(),cat,name,amt,out:true,date:today(),receipt:tempTxReceipt||''});
   tempTxReceipt='';
   data.finance.spent=(data.finance.spent||0)+amt;
@@ -1487,7 +1663,7 @@ function renderRead(){
         微信读书 App → 打开书籍 → 右上角「...」→ 导出笔记/划线 → 粘贴到这里<br>
         <span style="color:var(--blue)">自动按章节归类，与下方的"阅读笔记"独立分开</span>
       </p>
-      <textarea class="text-input" id="wereadNotes" rows="4" placeholder="粘贴微信读书导出的笔记，例：&#10;◆ 第一章 地方政府的权力与事务&#10;> 在某种意义上，经济增长不是市场自发产生的&#10;> 地方政府是经济发展中的关键行动者。&#10;◆ 第三章&#10;标注：事权下放，财权上收&#10;想法：这个观点很有启发"></textarea>
+      <textarea class="text-input" id="wereadNotes" rows="4" placeholder="粘贴微信读书导出的笔记，支持多种格式：&#10;◆ 第一章 地方政府的权力与事务&#10;> 在某种意义上，经济增长不是市场自发产生的&#10;标注：事权下放，财权上收&#10;想法：这个观点很有启发&#10;◆ 第三章&#10;** 关键句子 **（新版导出）&#10;想法（蓝）&#10;想法内容"></textarea>
       <button class="btn-ghost" style="margin-top:8px;background:var(--jade);color:var(--paper);border:none" onclick="importWereadNotes()">✓ 一键导入分析</button>
     </div>
     ${(book.wereadNotes||[]).length?`
@@ -1560,26 +1736,64 @@ function importWereadNotes(){
   if(!b.wereadNotes)b.wereadNotes=[];
   const chapters=[];
   let cur={chapter:'未分类',quotes:[],thoughts:[]};
+  let pending=''; // 记录「标注（黄）/想法（蓝）」标签后待归位的一行
+
+  function flush(){
+    if(cur.quotes.length||cur.thoughts.length)chapters.push(cur);
+    cur={chapter:'未分类',quotes:[],thoughts:[]};
+  }
+
   text.split('\n').forEach(line=>{
     const l=line.trim();if(!l)return;
-    // 章节标记
-    if(l.startsWith('◆')){
-      if(cur.quotes.length||cur.thoughts.length)chapters.push(cur);
-      cur={chapter:l.replace('◆','').trim().slice(0,40),quotes:[],thoughts:[]};
+    // 忽略微信读书签名行 / 纯页码行
+    if(/来自微信读书/.test(l)&&l.length<24)return;
+    if(/^[-*\s]*\d+\s*$/.test(l))return;
+    // 章节标记：◆ / markdown # 标题 / 【第X章】
+    let ch=null;
+    if(l.startsWith('◆'))ch=l.slice(1).trim();
+    else if(/^#{1,4}\s+/.test(l))ch=l.replace(/^#{1,4}\s+/,'').trim();
+    else if(/^【[^】]*章[^】]*】/.test(l)){
+      const _m=l.match(/^【([^】]*)】\s*(.*)$/);
+      ch=(_m?(_m[1].trim()+' '+( _m[2]||'').trim()).trim():l.trim()).slice(0,40);
+    }
+    if(ch){flush();cur={chapter:ch.slice(0,40),quotes:[],thoughts:[]};pending='';return}
+    // 标注（黄）/想法（蓝）：可能「标签即一行」或「标签+内容同一行」
+    const mark=l.match(/^(标注|想法)\s*[（(][^）)]*[）)]\s*(.*)$/);
+    if(mark){
+      const kind=mark[1]==='标注'?'quote':'thought';
+      const content=mark[2].trim();
+      if(content){if(kind==='quote')cur.quotes.push(content);else cur.thoughts.push(content);pending=''}
+      else{pending=kind}
       return;
     }
-    if(l.startsWith('> ')){cur.quotes.push(l.slice(2).trim());return}
-    if(l.startsWith('标注：')){cur.quotes.push(l.slice(3).trim());return}
-    if(l.startsWith('想法：')){cur.thoughts.push(l.slice(3).trim());return}
-    // 其他长文字当作附加划线
-    if(l.length>6&&!l.startsWith('◆')&&!l.startsWith('>')&&!l.startsWith('标注')&&!l.startsWith('想法')){
+    // 标注：内容 / 想法：内容
+    const inline=l.match(/^(标注|想法)[：（:]\s*(.+)$/);
+    if(inline){
+      const kind=inline[1]==='标注'?'quote':'thought';
+      const content=inline[2].trim();
+      if(content){if(kind==='quote')cur.quotes.push(content);else cur.thoughts.push(content)}
+      pending='';
+      return;
+    }
+    // 引用块 >
+    if(/^>\s*/.test(l)){cur.quotes.push(l.replace(/^>\s*/,'').trim());return}
+    // markdown 加粗 **内容**（新版微信读书导出）
+    if(/^\*\*.*\*\*$/.test(l)){cur.quotes.push(l.replace(/^\*\*|\*\*$/g,'').trim());return}
+    // 【划线】【原文】等前缀
+    if(/^【[^】]{1,8}】\s*/.test(l)){const _c=l.replace(/^【[^】]{1,8}】\s*/,'').trim();if(_c)cur.quotes.push(_c);return}
+    // 有「待归位」内容
+    if(pending){if(pending==='quote')cur.quotes.push(l);else cur.thoughts.push(l);pending='';return}
+    // 其他较长文本 → 附加划线
+    if(l.length>6&&!/^(第)?\d+[页Pp]/.test(l)&&!/^\d+[.、]/.test(l)){
       cur.quotes.push(l);
     }
   });
-  if(cur.quotes.length||cur.thoughts.length)chapters.push(cur);
+  flush();
   b.wereadNotes=chapters;
   saveAll();renderRead();
-  alert('已导入并解析 '+(b.wereadNotes||[]).reduce((s,c)=>s+c.quotes.length,0)+' 条划线、'+(b.wereadNotes||[]).reduce((s,c)=>s+(c.thoughts||[]).length,0)+' 条想法\n按 '+b.wereadNotes.length+' 个章节归类');
+  const qCount=chapters.reduce((s,c)=>s+c.quotes.length,0);
+  const tCount=chapters.reduce((s,c)=>s+(c.thoughts||[]).length,0);
+  alert('已导入并解析 '+qCount+' 条划线、'+tCount+' 条想法\n按 '+chapters.length+' 个章节归类');
 }
 function toggleChapter(i){
   const el=document.getElementById('wnBody'+i);if(el)el.style.display=el.style.display==='none'?'block':'none';
@@ -1643,20 +1857,71 @@ async function fetchNews(){
   console.warn('新闻获取失败，使用本地数据');
   if(badge){badge.innerHTML='● 离线';badge.style.color='var(--vermilion)'}
 }
-/* ===== 基金实时估值拉取（JSONP） ===== */
+/* ===== 基金实时估值拉取（天天基金 JSONP，失败自动回退新浪） ===== */
 function fetchFundValues(){
+  const codes=data.funds.map(f=>f.code).filter(Boolean);
+  if(!codes.length){alert('暂无带基金代码的持仓，无法获取实时估值');return}
+  const statusEl=$('#fundStatusTag');
+  if(statusEl)statusEl.textContent='⟳ 更新中…';
+  let remaining=codes.length,ok=0,finished=false,timeoutId=null;
+
+  // 天天基金 fundgz 返回固定回调名 jsonpgz，数据自带 fundcode，据此回填
+  window.jsonpgz=function(d){
+    try{
+      if(!d||!d.fundcode)return;
+      const f=data.funds.find(x=>x.code===d.fundcode);
+      if(f&&d.gsz){
+        const pct=parseFloat(d.gszzl)||0;
+        const gsz=parseFloat(d.gsz)||0;
+        const prev=parseFloat(d.dwjz)||gsz||0;
+        if(f.amount>0&&prev>0){
+          const shares=f.amount/prev; // 估算持仓份额
+          f.daily=Math.round(shares*(pct/100)*prev*100)/100; // 今日估值收益
+        }
+        f.currentNav=gsz;f.gszzl=pct;f.gztime=d.gztime||'';
+        ok++;
+      }
+    }catch(e){}
+  };
+
+  function finish(){
+    if(finished)return;finished=true;
+    saveAll();if(curPage==='finance')renderFinance();
+    if(statusEl){
+      statusEl.textContent=ok>0?(ok+'/'+codes.length+' 已更新'):'估值获取失败';
+      setTimeout(()=>{if(statusEl&&curPage==='finance')statusEl.textContent='实时估值'},4000);
+    }
+  }
+
+  codes.forEach(code=>{
+    const s=document.createElement('script');
+    s.src='https://fundgz.1234567.com.cn/js/'+code+'.js?rt='+Date.now();
+    s.onload=s.onerror=()=>{remaining--;if(remaining<=0){clearTimeout(timeoutId);finish()}};
+    document.body.appendChild(s);
+  });
+  timeoutId=setTimeout(()=>{
+    if(remaining>0){
+      remaining=0;
+      if(ok===0){fetchFundValuesSina();return} // 天天基金不可达 → 新浪兜底
+      finish();
+    }
+  },10000);
+}
+
+/* 新浪兜底（原接口） */
+function fetchFundValuesSina(){
   const codes=data.funds.map(f=>'of'+f.code).join(',');
   if(!codes)return;
+  const statusEl=$('#fundStatusTag');
+  if(statusEl)statusEl.textContent='⟳ 新浪兜底中…';
   const cbName='fundCb_'+Date.now();
   let done=false,timeoutId=null;
-
   function cleanup(){
     done=true;
     try{delete window[cbName]}catch(e){window[cbName]=undefined}
     const s=document.getElementById('fundScript');if(s)s.remove();
     if(timeoutId)clearTimeout(timeoutId);
   }
-
   window[cbName]=function(){
     if(done)return;cleanup();
     // 读取全局 hq_str_of{CODE} 变量，更新基金数据
@@ -1667,27 +1932,25 @@ function fetchFundValues(){
         if(parts.length>=5){
           const dailyPct=parseFloat(parts[4])||0;
           const nav=parseFloat(parts[1])||0;
-          // 用最新净值和持仓份额估算 daily 收益
           if(nav>0&&f.amount>0){
             const prevNav=parseFloat(parts[3])||nav;
-            const shares=f.amount/nav; // 估算持仓份额
+            const shares=f.amount/nav;
             f.daily=Math.round(shares*dailyPct/100*nav*100)/100;
           }
           f.currentNav=nav;
-          delete window[gk]; // 清理
+          delete window[gk];
         }
       }
     });
     saveAll();if(curPage==='finance')renderFinance();
+    if(statusEl)statusEl.textContent='已更新（新浪）';
   };
-
   const script=document.createElement('script');
   script.id='fundScript';
   script.src='https://hq.sinajs.cn/list='+codes;
   script.onerror=cleanup;
   document.body.appendChild(script);
   timeoutId=setTimeout(cleanup,8000);
-  // 等脚本执行后调用回调
   setTimeout(()=>{if(!done&&window[cbName])window[cbName]()},500);
 }
 
@@ -1802,13 +2065,13 @@ function bindEvents(){
   $('#sidebarToggle').onclick=toggleSidebar;$('#sidebarClose').onclick=closeSidebar;$('#sidebarOverlay').onclick=closeSidebar;
   $('#btnExport').onclick=exportData;$('#btnImport').onclick=importData;
   $('#btnSyncOut').onclick=syncExport;$('#btnSyncIn').onclick=syncImport;
-  $('#btnCloudPush').onclick=cloudPush;
+  $('#btnCloudPush').onclick=manualCloudPush;
   setTimeout(autoCloudCheck,5000);setInterval(autoCloudCheck,90000);
   document.getElementById('imgInput').onchange=handleImageUpload;
   $('#themeBtn').onclick=cycleTheme;
   document.addEventListener('keydown',e=>{
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
-    const map={'1':'todo','2':'morning','3':'english','4':'learn','5':'finance','7':'read'};
+    const map={'1':'todo','2':'morning','3':'english','4':'learn','5':'finance','7':'read','8':'englishResources'};
     if(map[e.key]){go(map[e.key]);if(window.innerWidth<900)closeSidebar()}
     if(e.key==='m'||e.key==='M'||e.key==='Escape'){if(e.key==='Escape')closeSidebar();else toggleSidebar()}
     if(e.key==='t'||e.key==='T'){$('#themeBtn').click()}
@@ -1824,8 +2087,10 @@ function init(){
   if(!data.news||!data.news.length)data.news=DEFAULT_DATA.news; // 确保默认新闻
   bindEvents();
   go('todo');
+  setTimeout(initialCloudSync,800); // 启动后拉取云端并合并
   fetchNews();
   fetchFundValues(); // 自动刷新基金估值
+  setInterval(()=>{if(curPage==='finance')fetchFundValues()},60000); // 财务页时每分钟自动刷新估值
   const d=new Date();$('#liveClock').textContent=d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
 }
 
@@ -1833,7 +2098,7 @@ function init(){
 window.go=go;window.toggleSidebar=toggleSidebar;window.openSidebar=openSidebar;window.closeSidebar=closeSidebar;
 window.toggleTodo=toggleTodo;window.delTodo=delTodo;window.addTodo=addTodo;
 window.quickToggleTodo=quickToggleTodo;window.addNewsManually=addNewsManually;window.toggleNewsForm=toggleNewsForm;
-window.setAccent=setAccent;window.playSentence=playSentence;window.submitPractice=submitPractice;window.speakWord=speakWord;window.markMastered=markMastered;window.delVocab=delVocab;window.addSentence=addSentence;window.goReview=goReview;window.playDictation=playDictation;window.checkDictation=checkDictation;window.changeAccent=changeAccent;window.addEnglishSource=addEnglishSource;window.loadAudioFor=loadAudioFor;window.removeEnglishSource=removeEnglishSource;
+window.setAccent=setAccent;window.playSentence=playSentence;window.submitPractice=submitPractice;window.speakWord=speakWord;window.markMastered=markMastered;window.delVocab=delVocab;window.addSentence=addSentence;window.goReview=goReview;window.playDictation=playDictation;window.checkDictation=checkDictation;window.changeAccent=changeAccent;window.addEnglishSource=addEnglishSource;window.loadAudioFor=loadAudioFor;window.removeEnglishSource=removeEnglishSource;window.addEnglishResource=addEnglishResource;window.delEnglishResource=delEnglishResource;
 window.cycleLearn=cycleLearn;window.toggleAnswer=toggleAnswer;
 window.addCollect=addCollect;window.addTx=addTx;window.editTx=editTx;window.uploadReceipt=uploadReceipt;window.handleTxReceipt=handleTxReceipt;window.viewReceipt=viewReceipt;window.clearFundImages=clearFundImages;window.bulkImportFunds=bulkImportFunds;
 window.updateBook=updateBook;window.switchBook=switchBook;window.addBook=addBook;window.removeBook=removeBook;window.toggleAddBook=toggleAddBook;window.saveReadingNotes=saveReadingNotes;window.importWereadNotes=importWereadNotes;window.toggleChapter=toggleChapter;window.clearWereadNotes=clearWereadNotes;window.openWeread=openWeread;
@@ -1856,14 +2121,31 @@ function getGitHubToken(){
   return token;
 }
 
-async function cloudPush(){
-  let token = getGitHubToken(); if(!token)return;
+let _applyingRemote=false; // 合并/恢复期间写 localStorage 时不触发自动推送
+
+// 手动云备份：未配置 Token 时弹出引导
+async function manualCloudPush(){
+  const token=getGitHubToken();if(!token)return;
+  await cloudPush(token);
+}
+
+// 直接写 localStorage，不触发自动推送
+function setRemote(key,value){
+  _applyingRemote=true;
+  try{localStorage.setItem(key,value)}catch(e){}finally{_applyingRemote=false}
+}
+
+async function cloudPush(token){
+  if(!token)token=localStorage.getItem('loran_gh_token');
+  if(!token)return; // 自动同步未配置 Token 时静默跳过（手动按钮负责引导）
   const status = $('#statusBadge'); if(status) status.textContent = '⟳ 同步中';
   const allData = {};
   for(let i=0; i<localStorage.length; i++){
     const k = localStorage.key(i);
-    if(k!=='loran_gh_token') allData[k]=localStorage.getItem(k);
+    if(k!=='loran_gh_token'&&k!==SYNC_META_KEY) allData[k]=localStorage.getItem(k);
   }
+  allData.__syncMeta=loadSyncMeta();
+  allData.__syncUpdatedAt=Date.now();
   const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(allData))));
   const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
   try{
@@ -1880,7 +2162,7 @@ async function cloudPush(){
       const p=await fetch(url,{
         method:'PUT',
         headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
-        body:JSON.stringify({message:'backup '+new Date().toLocaleString(),content:b64,sha})
+        body:JSON.stringify({message:'sync '+new Date().toLocaleString(),content:b64,sha})
       });
       if(p.ok){if(status)status.textContent='● 已同步';break}
       if(p.status===409&&attempt===0){
@@ -1894,8 +2176,8 @@ async function cloudPush(){
       else alert('云同步失败：'+(e.message||'HTTP '+p.status))
       break;
     }
-  }catch(e){alert('网络错误：'+e.message)}
-  if(status)setTimeout(()=>{if(status.textContent!=='● 离线')status.textContent='● 实时'},3000);
+  }catch(e){console.warn('云同步网络错误',e)}
+  if(status)setTimeout(()=>{if(status.textContent==='⟳ 同步中'||status.textContent==='● 已同步')status.textContent='● 实时'},3500);
 }
 
 async function cloudPull(){
@@ -1910,16 +2192,27 @@ async function cloudPull(){
     const d=await r.json();
     const cloud=JSON.parse(decodeURIComponent(escape(atob(d.content))));
     let count=0;
-    for(const k in cloud){localStorage.setItem(k,cloud[k]);count++}
+    _applyingRemote=true;
+    try{
+      for(const k in cloud){
+        if(k==='loran_gh_token'||k==='__syncUpdatedAt'||k==='__syncMeta')continue;
+        localStorage.setItem(k,cloud[k]);count++;
+      }
+      if(cloud.__syncMeta)saveSyncMeta(cloud.__syncMeta);
+    }finally{_applyingRemote=false}
     if(count>0){alert('已恢复 '+count+' 条数据！刷新中...');location.reload()}
   }catch(e){alert('网络错误：'+e.message)}
 }
 
-// 自动备份
+// 自动备份（本地任何数据变化 → 防抖推送云端）
 let _cloudTimer=null;
 function autoCloudSave(){clearTimeout(_cloudTimer);_cloudTimer=setTimeout(cloudPush,8000)}
 const _origSetItem=Storage.prototype.setItem;
-Storage.prototype.setItem=function(k,v){_origSetItem.call(this,k,v);if(k!=='loran_gh_token')autoCloudSave()};
+Storage.prototype.setItem=function(k,v){
+  _origSetItem.call(this,k,v);
+  if(k==='loran_gh_token'||k===SYNC_META_KEY||_applyingRemote)return;
+  autoCloudSave();
+};
 
 async function fetchCloudData(){
   const token=localStorage.getItem('loran_gh_token');if(!token)return null;
@@ -1933,37 +2226,50 @@ async function fetchCloudData(){
   }catch(e){return null}
 }
 
-// 把云端对象合并入 localStorage（books 按 title 去重，其它字段仅在本地为空时采用云端）
+// 按「模块最后改动时间」双向合并：云端更新的模块采纳云端，本地更新的保留本地
 function mergeCloudIntoLocal(cloud){
   if(!cloud)return [];
   const changes=[];
+  const localMeta=loadSyncMeta();
   for(const k in cloud){
-    if(k==='loran_gh_token')continue;
-    const local=localStorage.getItem(k);
+    if(k==='loran_gh_token'||k==='__syncUpdatedAt'||k==='__syncMeta')continue;
+    const key=k.replace(/^loran_/,'');
     const cv=cloud[k];
+    const local=localStorage.getItem(k);
+    if(cv===local)continue; // 完全相同，跳过
+    const cloudModTs=(cloud.__syncMeta&&cloud.__syncMeta[key])||0;
+    const localModTs=localMeta[key]||0;
     if(k==='loran_books'){
+      // 书籍按 title 合并：两端各自新增的书都保留，同名书取时间新的一侧
       try{
         const localBooks=local?JSON.parse(local):[];
         const cloudBooks=JSON.parse(cv);
-        const titleSet=new Set(localBooks.map(b=>b.title));
-        const newTitles=[];
+        const preferCloud=cloudModTs>=localModTs;
+        const map=new Map();
+        for(const b of localBooks){if(b&&b.title&&!map.has(b.title))map.set(b.title,b)}
         for(const cb of cloudBooks){
-          if(!titleSet.has(cb.title)){localBooks.push(cb);newTitles.push(cb.title);titleSet.add(cb.title)}
+          if(!cb||!cb.title)continue;
+          if(!map.has(cb.title))map.set(cb.title,cb);
+          else if(preferCloud)map.set(cb.title,cb);
         }
-        if(newTitles.length){
-          localStorage.setItem('loran_books',JSON.stringify(localBooks));
-          changes.push({type:'books_added',titles:newTitles});
+        const merged=[...map.values()];
+        const mergedStr=JSON.stringify(merged);
+        if(mergedStr!==local){
+          setRemote('loran_books',mergedStr);
+          localMeta.books=Math.max(cloudModTs,localModTs);
+          changes.push({type:'books_merged',titles:merged.map(b=>b.title)});
         }
       }catch(e){}
       continue;
     }
-    // 其它字段：本地为空时用云端，避免覆盖本地修改
-    const isEmpty=!local||local==='null'||local==='[]'||local==='{}';
-    if(isEmpty&&cv&&cv!=='null'){
-      localStorage.setItem(k,cv);
-      changes.push({type:'field_adopted',key:k});
+    // 其它模块：云端时间戳更新 → 采纳云端
+    if(cloudModTs>localModTs){
+      setRemote(k,cv);
+      localMeta[key]=cloudModTs;
+      changes.push({type:'field_adopted',key});
     }
   }
+  saveSyncMeta(localMeta);
   return changes;
 }
 
@@ -1972,26 +2278,25 @@ async function autoCloudCheck(){
   if(!cloud)return;
   const changes=mergeCloudIntoLocal(cloud);
   if(!changes.length)return;
-  // 把变化同步进内存 data 并刷新阅读面板
-  try{data.books=ls.get('books',DEFAULT_DATA.books)}catch(e){}
-  try{data.readingIndex=ls.get('readingIndex',DEFAULT_DATA.readingIndex)}catch(e){}
-  if(typeof renderRead==='function')renderRead();
-  // 顶部状态条提示
+  // 把合并结果载入内存并重渲染当前页
+  loadData();
+  if(PAGES[curPage])PAGES[curPage]();
   const status=$('#statusBadge');
-  const bookChg=changes.find(c=>c.type==='books_added');
-  if(status){
-    if(bookChg){
-      status.textContent='✓ 合并 +'+bookChg.titles.length+' 本';
-      setTimeout(()=>{if(status.textContent.indexOf('合并')>=0)status.textContent='● 实时'},5000);
-    }else{
-      status.textContent='✓ 已合并';
-      setTimeout(()=>{if(status.textContent.indexOf('合并')>=0)status.textContent='● 实时'},5000);
-    }
-  }
-  // 有内容变更→把合并结果立即回传，避免被云端旧版本覆盖
-  if(bookChg||changes.some(c=>c.type==='field_adopted')){
-    setTimeout(cloudPush,2000);
-  }
+  if(status){status.textContent='✓ 已同步';setTimeout(()=>{if(status.textContent==='✓ 已同步')status.textContent='● 实时'},4000)}
+  // 有变化→把合并结果回传云端，避免被旧版本覆盖
+  setTimeout(cloudPush,2000);
+}
+
+// 启动时拉取云端并合并（有 Token 才执行，无 Token 静默跳过）
+async function initialCloudSync(){
+  if(!localStorage.getItem('loran_gh_token'))return;
+  const cloud=await fetchCloudData();
+  if(!cloud)return;
+  const changes=mergeCloudIntoLocal(cloud);
+  if(!changes.length)return;
+  loadData();
+  if(PAGES[curPage])PAGES[curPage]();
+  setTimeout(cloudPush,2000);
 }
 
 init();
