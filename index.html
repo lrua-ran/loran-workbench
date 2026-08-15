@@ -602,7 +602,7 @@ textarea.text-input{resize:vertical;min-height:60px}
       <div class="sidebar-foot-row">
         <button class="btn-sm" id="btnCloudPush" title="一键备份到CloudBase云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
       </div>
-      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2c · 史记 · 读书修身 · CloudBase 云同步</div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2d · 史记 · 读书修身 · CloudBase 云同步</div>
     </div>
   </aside>
 
@@ -629,7 +629,7 @@ textarea.text-input{resize:vertical;min-height:60px}
     <div class="content"><div class="container" id="contentArea"></div></div>
     <div class="foot-strip">
       <span>按 1-8 切换模块 · 数据本地持久化</span>
-      <span>&copy; Loran · 工作台 v5.2c</span>
+      <span>&copy; Loran · 工作台 v5.2d</span>
     </div>
   </main>
 </div>
@@ -2112,17 +2112,24 @@ window.editTodo=editTodo;
 //   国际版域名又自 2022 年起屏蔽国内 IP。CloudBase 是腾讯自家已备案域名 + 官方 Web SDK 自带跨域，国内手机/电脑都能直连。
 // 配置：localStorage['loran_cb_env'] 存「环境 ID」（形如 xxx-1a2b3c4d5），localStorage['loran_cb_region'] 存「地域」，每台设备配一次即可。
 function getSyncConfig(){
-  if(!localStorage.getItem('loran_cb_env')){
+  const regionName={'ap-shanghai':'上海','ap-guangzhou':'广州','ap-beijing':'北京','ap-singapore':'新加坡'};
+  const env=localStorage.getItem('loran_cb_env');
+  if(env){
+    const reg=localStorage.getItem('loran_cb_region')||'ap-shanghai';
+    const ok=confirm('当前云同步配置：\n\n环境 ID：'+env+'\n地域：'+(regionName[reg]||reg)+'\n\n✔ 点「确定」= 就用这个配置继续同步\n✖ 点「取消」= 重新选择地域');
+    if(ok)return env;
+  }
+  let env2=env;
+  if(!env2){
     const val=prompt('🔐 首次云同步，请输入腾讯云开发 CloudBase 的「环境 ID」：\n\n① 打开 cloud.tencent.com → 顶部搜索「云开发」进入控制台\n② 选你的环境 → 右上角复制「环境 ID」（形如 xxx-1a2b3c4d5）\n\n还没开通？按 Obsidian 里的《部署指南》先注册开通（免费，约10分钟），再回来粘贴。');
     if(!val)return null;
-    localStorage.setItem('loran_cb_env',val.trim());
+    env2=val.trim();
+    localStorage.setItem('loran_cb_env',env2);
   }
-  if(!localStorage.getItem('loran_cb_region')){
-    const r=prompt('📍 请选择 CloudBase 环境所在地域（输入数字后点确定）：\n\n1. 上海（华东，代码默认）\n2. 广州（华南，深圳/广州推荐）\n3. 北京（华北）\n4. 新加坡\n\n怎么看：CloudBase 控制台 → 你的环境 → 环境设置 → 地域。\n不确定就先选 2，不行再换。','2');
-    const map={'1':'ap-shanghai','2':'ap-guangzhou','3':'ap-beijing','4':'ap-singapore'};
-    localStorage.setItem('loran_cb_region',(map[(r||'').trim()]||'ap-guangzhou'));
-  }
-  return localStorage.getItem('loran_cb_env');
+  const r=prompt('📍 请选择 CloudBase 环境所在地域（输入数字后点确定）：\n\n1. 上海（华东，默认，推荐）\n2. 广州（华南）\n3. 北京（华北）\n4. 新加坡\n\n你的环境基本在「上海」——CloudBase 只有上海地域功能最全（广州地域不支持数据库）。\n不确定就选 1。','1');
+  const map={'1':'ap-shanghai','2':'ap-guangzhou','3':'ap-beijing','4':'ap-singapore'};
+  localStorage.setItem('loran_cb_region',(map[(r||'').trim()]||'ap-shanghai'));
+  return env2;
 }
 
 let _applyingRemote=false; // 合并/恢复期间写 localStorage 时不触发自动推送
