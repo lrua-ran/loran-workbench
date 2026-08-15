@@ -2205,19 +2205,25 @@ async function cloudPush(silent){
   const env=localStorage.getItem('loran_cb_env');if(!env)return; // 未配置时静默跳过（手动按钮负责引导）
   const status = $('#statusBadge'); if(status) status.textContent = '⟳ 同步中';
   try{
-    const app=await getCBApp();if(!app)return;
+    const app=await getCBApp().catch(e=>{throw new Error('【身份认证】'+errMsg(e))});
+    if(!app)return;
     const allData=collectSyncData();
     allData.__syncMeta=loadSyncMeta();
     allData.__syncUpdatedAt=Date.now();
     const payload=JSON.stringify(allData);
     const col=app.database().collection('workbench');
     // 用固定 _id 'sync_data'，两端永远指向同一份数据
-    const r=await col.doc('sync_data').get().catch(()=>({data:[]}));
-    if(r.data&&r.data.length){
-      await col.doc('sync_data').set({payload,updatedAt:Date.now()});
-    }else{
-      await col.add({_id:'sync_data',payload,updatedAt:Date.now()});
-    }
+    let r;
+    try{
+      r=await col.doc('sync_data').get();
+    }catch(e){throw new Error('【读云端】'+errMsg(e))}
+    try{
+      if(r&&r.data&&r.data.length){
+        await col.doc('sync_data').set({payload,updatedAt:Date.now()});
+      }else{
+        await col.add({_id:'sync_data',payload,updatedAt:Date.now()});
+      }
+    }catch(e){throw new Error('【写云端】'+errMsg(e))}
     if(status)status.textContent='● 已同步';
   }catch(e){
     console.warn('云同步失败',e);
