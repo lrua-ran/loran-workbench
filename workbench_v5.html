@@ -2122,6 +2122,18 @@ function getSyncConfig(){
 
 let _applyingRemote=false; // 合并/恢复期间写 localStorage 时不触发自动推送
 
+// 把各种 SDK 报错转成可读文字（有的错误对象没有 message 字段）
+function errMsg(e){
+  if(!e)return '未知错误';
+  if(typeof e==='string')return e;
+  if(e.message)return e.message;
+  if(e.errMsg)return e.errMsg;
+  if(e.error)return typeof e.error==='string'?e.error:JSON.stringify(e.error);
+  if(e.error_msg)return e.error_msg;
+  if(e.detail)return typeof e.detail==='string'?e.detail:JSON.stringify(e.detail);
+  try{const s=JSON.stringify(e);return s&&s!=='{}'?s:String(e)}catch(x){return String(e)}
+}
+
 // 按需加载 CloudBase Web SDK（没配置环境就不加载，保持页面轻量）
 let _cbSdkPromise=null;
 function ensureCloudBase(){
@@ -2138,16 +2150,23 @@ function ensureCloudBase(){
 }
 
 // 获取（缓存的）CloudBase 实例 + 匿名登录
-let _cbEnv=null,_cbApp=null;
+let _cbEnv=null,_cbApp=null,_cbAuthed=false;
 async function getCBApp(){
   const env=localStorage.getItem('loran_cb_env');if(!env)return null;
   if(!_cbApp||_cbEnv!==env){
     const cloudbase=await ensureCloudBase();
     _cbEnv=env;
     _cbApp=cloudbase.init({env});
+    _cbAuthed=false;
   }
-  const auth=_cbApp.auth();
-  try{await auth.signInAnonymously()}catch(e){}
+  if(!_cbAuthed){
+    try{
+      await _cbApp.auth().signInAnonymously();
+      _cbAuthed=true;
+    }catch(ae){
+      throw new Error((ae&&(ae.message||ae.errMsg||ae.error))||'匿名登录失败：请在 CloudBase 控制台 → 身份认证 → 登录方式，开启「匿名登录」');
+    }
+  }
   return _cbApp;
 }
 
@@ -2203,7 +2222,7 @@ async function cloudPush(silent){
   }catch(e){
     console.warn('云同步失败',e);
     if(status)status.textContent='● 离线';
-    if(!silent)alert('云同步失败：'+(e&&e.message||e)+'\n\n请对照检查（详见 Obsidian 部署指南）：\n① 安全来源：CloudBase 控制台 → 环境 → 安全配置 → 安全来源，添加 '+location.origin+'\n② 身份认证 → 登录方式 → 开启「匿名登录」\n③ 数据存储 → 创建集合 workbench → 权限选「所有用户可读可写」');
+    if(!silent)alert('云同步失败：'+errMsg(e)+'\n\n请对照检查（详见 Obsidian 部署指南）：\n① 安全来源：CloudBase 控制台 → 环境 → 安全配置 → 安全来源，添加 '+location.origin+'\n② 身份认证 → 登录方式 → 开启「匿名登录」\n③ 数据存储 → 创建集合 workbench → 权限选「所有用户可读可写」');
   }
   if(status)setTimeout(()=>{if(status.textContent==='⟳ 同步中'||status.textContent==='● 已同步')status.textContent='● 实时'},3500);
 }
