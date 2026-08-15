@@ -600,9 +600,9 @@ textarea.text-input{resize:vertical;min-height:60px}
         <button class="btn-sm" id="btnImport">导入恢复</button>
       </div>
       <div class="sidebar-foot-row">
-        <button class="btn-sm" id="btnCloudPush" title="一键备份到GitHub云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
+        <button class="btn-sm" id="btnCloudPush" title="一键备份到CloudBase云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
       </div>
-      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.1 · 史记 · 读书修身 · 仓库云同步</div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2 · 史记 · 读书修身 · CloudBase 云同步</div>
     </div>
   </aside>
 
@@ -629,7 +629,7 @@ textarea.text-input{resize:vertical;min-height:60px}
     <div class="content"><div class="container" id="contentArea"></div></div>
     <div class="foot-strip">
       <span>按 1-8 切换模块 · 数据本地持久化</span>
-      <span>&copy; Loran · 工作台 v5.1</span>
+      <span>&copy; Loran · 工作台 v5.2</span>
     </div>
   </main>
 </div>
@@ -2106,27 +2106,74 @@ window.toggleArchive=toggleArchive;window.syncExport=syncExport;window.syncImpor
 window.cloudPush=cloudPush;window.cloudPull=cloudPull;
 window.editTodo=editTodo;
 
-/* ===== GitHub 仓库云端同步 ===== */
-const GITHUB_USERNAME = 'lrua-ran';
-const GITHUB_REPO = 'loran-workbench';
-const CLOUD_FILE  = 'workbench-data.json';
-
-function getGitHubToken(){
-  let token = localStorage.getItem('loran_gh_token');
-  if(!token){
-    token = prompt('🔐 首次云同步，请输入 GitHub Token：\n\n① 打开 github.com/settings/tokens\n② Generate new token → Fine-grained\n③ 选 lrua-ran 账户\n④ Repository: Only select → loran-workbench\n⑤ Permissions → Contents → Read and write\n⑥ 生成后粘贴到这里');
-    if(token){localStorage.setItem('loran_gh_token',token)}
-    else{return null}
-  }
-  return token;
+/* ===== CloudBase 腾讯云开发 · 云端同步 ===== */
+// 为什么换掉 GitHub：api.github.com 在国内手机网络下访问不畅（就是之前"同步不理想"的根因）。
+// 为什么不用 LeanCloud 国内版：现在要求绑定"已备案的自定义域名"，个人没有备案域名用不了；
+//   国际版域名又自 2022 年起屏蔽国内 IP。CloudBase 是腾讯自家已备案域名 + 官方 Web SDK 自带跨域，国内手机/电脑都能直连。
+// 配置：localStorage['loran_cb_env'] 存「环境 ID」（形如 xxx-1a2b3c4d5），每台设备配一次即可。
+function getSyncConfig(){
+  const env=localStorage.getItem('loran_cb_env');
+  if(env)return env;
+  const val=prompt('🔐 首次云同步，请输入腾讯云开发 CloudBase 的「环境 ID」：\n\n① 打开 cloud.tencent.com → 顶部搜索「云开发」进入控制台\n② 选你的环境 → 右上角复制「环境 ID」（形如 xxx-1a2b3c4d5）\n\n还没开通？按 Obsidian 里的《部署指南》先注册开通（免费，约10分钟），再回来粘贴。');
+  if(!val)return null;
+  localStorage.setItem('loran_cb_env',val.trim());
+  return val.trim();
 }
 
 let _applyingRemote=false; // 合并/恢复期间写 localStorage 时不触发自动推送
 
-// 手动云备份：未配置 Token 时弹出引导
+// 按需加载 CloudBase Web SDK（没配置环境就不加载，保持页面轻量）
+let _cbSdkPromise=null;
+function ensureCloudBase(){
+  if(_cbSdkPromise)return _cbSdkPromise;
+  _cbSdkPromise=new Promise((resolve,reject)=>{
+    if(window.cloudbase){resolve(window.cloudbase);return}
+    const s=document.createElement('script');
+    s.src='https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js';
+    s.onload=()=>window.cloudbase?resolve(window.cloudbase):reject(new Error('SDK 加载失败'));
+    s.onerror=()=>reject(new Error('SDK 加载失败（网络不通）'));
+    document.head.appendChild(s);
+  });
+  return _cbSdkPromise;
+}
+
+// 获取（缓存的）CloudBase 实例 + 匿名登录
+let _cbEnv=null,_cbApp=null;
+async function getCBApp(){
+  const env=localStorage.getItem('loran_cb_env');if(!env)return null;
+  if(!_cbApp||_cbEnv!==env){
+    const cloudbase=await ensureCloudBase();
+    _cbEnv=env;
+    _cbApp=cloudbase.init({env});
+  }
+  const auth=_cbApp.auth();
+  try{await auth.signInAnonymously()}catch(e){}
+  return _cbApp;
+}
+
+// 收集要同步的数据：排除密钥配置、本地图片等
+function collectSyncData(){
+  const allData={};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k==='loran_cb_env'||k==='loran_gh_token'||k===SYNC_META_KEY||k==='loran_fundImages')continue;
+    if(k==='loran_transactions'){
+      // 收据(Receipt)是本地大图 base64，只留在本地，不上云
+      try{
+        const txs=JSON.parse(localStorage.getItem(k));
+        allData[k]=JSON.stringify(txs.map(t=>{const o=Object.assign({},t);o.receipt='';return o}));
+      }catch(e){allData[k]=localStorage.getItem(k)}
+      continue;
+    }
+    allData[k]=localStorage.getItem(k);
+  }
+  return allData;
+}
+
+// 手动云备份：未配置环境时弹引导
 async function manualCloudPush(){
-  const token=getGitHubToken();if(!token)return;
-  await cloudPush(token);
+  const env=getSyncConfig();if(!env)return;
+  await cloudPush();
 }
 
 // 直接写 localStorage，不触发自动推送
@@ -2135,95 +2182,71 @@ function setRemote(key,value){
   try{localStorage.setItem(key,value)}catch(e){}finally{_applyingRemote=false}
 }
 
-async function cloudPush(token){
-  if(!token)token=localStorage.getItem('loran_gh_token');
-  if(!token)return; // 自动同步未配置 Token 时静默跳过（手动按钮负责引导）
+async function cloudPush(silent){
+  const env=localStorage.getItem('loran_cb_env');if(!env)return; // 未配置时静默跳过（手动按钮负责引导）
   const status = $('#statusBadge'); if(status) status.textContent = '⟳ 同步中';
-  const allData = {};
-  for(let i=0; i<localStorage.length; i++){
-    const k = localStorage.key(i);
-    if(k!=='loran_gh_token'&&k!==SYNC_META_KEY) allData[k]=localStorage.getItem(k);
-  }
-  allData.__syncMeta=loadSyncMeta();
-  allData.__syncUpdatedAt=Date.now();
-  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(allData))));
-  const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
   try{
-    let sha=null;
-    const g=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}});
-    if(g.ok){const d=await g.json();sha=d.sha}
-    else if(g.status===401||g.status===403){
-      localStorage.removeItem('loran_gh_token');
-      alert('Token 权限不足！\n\n请检查：\n① Token 类型是 Fine-grained\n② 选了仓库 lrua-ran/loran-workbench\n③ Contents 权限是 Read and write');
-      if(status)status.textContent='● 离线';return;
+    const app=await getCBApp();if(!app)return;
+    const allData=collectSyncData();
+    allData.__syncMeta=loadSyncMeta();
+    allData.__syncUpdatedAt=Date.now();
+    const payload=JSON.stringify(allData);
+    const col=app.database().collection('workbench');
+    // 用固定 _id 'sync_data'，两端永远指向同一份数据
+    const r=await col.doc('sync_data').get().catch(()=>({data:[]}));
+    if(r.data&&r.data.length){
+      await col.doc('sync_data').set({payload,updatedAt:Date.now()});
+    }else{
+      await col.add({_id:'sync_data',payload,updatedAt:Date.now()});
     }
-    // PUT请求，SHA冲突时自动重试一次
-    for(let attempt=0;attempt<2;attempt++){
-      const p=await fetch(url,{
-        method:'PUT',
-        headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
-        body:JSON.stringify({message:'sync '+new Date().toLocaleString(),content:b64,sha})
-      });
-      if(p.ok){if(status)status.textContent='● 已同步';break}
-      if(p.status===409&&attempt===0){
-        // SHA冲突→重新获取再试
-        const g2=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}});
-        if(g2.ok){const d2=await g2.json();sha=d2.sha;continue}
-      }
-      const e=await p.json().catch(()=>({}));
-      if(p.status===401||p.status===403){localStorage.removeItem('loran_gh_token');alert('Token 权限不足，请重新生成')}
-      else if(p.status===409)alert('云同步冲突，请稍后重试')
-      else alert('云同步失败：'+(e.message||'HTTP '+p.status))
-      break;
-    }
-  }catch(e){console.warn('云同步网络错误',e)}
+    if(status)status.textContent='● 已同步';
+  }catch(e){
+    console.warn('云同步失败',e);
+    if(status)status.textContent='● 离线';
+    if(!silent)alert('云同步失败：'+(e&&e.message||e)+'\n\n请对照检查（详见 Obsidian 部署指南）：\n① 安全来源：CloudBase 控制台 → 环境 → 安全配置 → 安全来源，添加 '+location.origin+'\n② 身份认证 → 登录方式 → 开启「匿名登录」\n③ 数据存储 → 创建集合 workbench → 权限选「所有用户可读可写」');
+  }
   if(status)setTimeout(()=>{if(status.textContent==='⟳ 同步中'||status.textContent==='● 已同步')status.textContent='● 实时'},3500);
 }
 
 async function cloudPull(){
-  let token = getGitHubToken(); if(!token)return;
+  if(!localStorage.getItem('loran_cb_env')){
+    const v=getSyncConfig();if(!v)return;
+  }
   if(!confirm('将从云端恢复数据，覆盖本地。确认继续？'))return;
-  const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
+  const cloud=await fetchCloudData();
+  if(!cloud){alert('云端暂无数据或读取失败');return}
+  let count=0;
+  _applyingRemote=true;
   try{
-    const r=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}});
-    if(r.status===401||r.status===403){localStorage.removeItem('loran_gh_token');alert('Token 无效！');return}
-    if(r.status===404){alert('云端暂无备份数据');return}
-    if(!r.ok){alert('拉取失败：HTTP '+r.status);return}
-    const d=await r.json();
-    const cloud=JSON.parse(decodeURIComponent(escape(atob(d.content))));
-    let count=0;
-    _applyingRemote=true;
-    try{
-      for(const k in cloud){
-        if(k==='loran_gh_token'||k==='__syncUpdatedAt'||k==='__syncMeta')continue;
-        localStorage.setItem(k,cloud[k]);count++;
-      }
-      if(cloud.__syncMeta)saveSyncMeta(cloud.__syncMeta);
-    }finally{_applyingRemote=false}
-    if(count>0){alert('已恢复 '+count+' 条数据！刷新中...');location.reload()}
-  }catch(e){alert('网络错误：'+e.message)}
+    for(const k in cloud){
+      if(k==='loran_cb_env'||k==='loran_gh_token'||k==='__syncUpdatedAt'||k==='__syncMeta'||k==='loran_fundImages')continue;
+      localStorage.setItem(k,cloud[k]);count++;
+    }
+    if(cloud.__syncMeta)saveSyncMeta(cloud.__syncMeta);
+  }finally{_applyingRemote=false}
+  if(count>0){alert('已恢复 '+count+' 条数据！刷新中...');location.reload()}
 }
 
 // 自动备份（本地任何数据变化 → 防抖推送云端）
 let _cloudTimer=null;
-function autoCloudSave(){clearTimeout(_cloudTimer);_cloudTimer=setTimeout(cloudPush,8000)}
+function autoCloudSave(){clearTimeout(_cloudTimer);_cloudTimer=setTimeout(()=>cloudPush(true),8000)}
 const _origSetItem=Storage.prototype.setItem;
 Storage.prototype.setItem=function(k,v){
   _origSetItem.call(this,k,v);
-  if(k==='loran_gh_token'||k===SYNC_META_KEY||_applyingRemote)return;
+  if(k==='loran_cb_env'||k==='loran_gh_token'||k===SYNC_META_KEY||_applyingRemote)return;
   autoCloudSave();
 };
 
 async function fetchCloudData(){
-  const token=localStorage.getItem('loran_gh_token');if(!token)return null;
-  const url=`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${CLOUD_FILE}`;
+  const env=localStorage.getItem('loran_cb_env');if(!env)return null;
   try{
-    const r=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github.v3+json'}});
-    if(r.status===401||r.status===403){localStorage.removeItem('loran_gh_token');return null}
-    if(!r.ok)return null;
-    const d=await r.json();
-    return JSON.parse(decodeURIComponent(escape(atob(d.content))));
-  }catch(e){return null}
+    const app=await getCBApp();if(!app)return null;
+    const r=await app.database().collection('workbench').doc('sync_data').get();
+    if(!r.data||!r.data.length)return null;
+    const doc=r.data[0];
+    if(!doc.payload)return null;
+    return JSON.parse(doc.payload);
+  }catch(e){console.warn('拉取云端失败',e);return null}
 }
 
 // 按「模块最后改动时间」双向合并：云端更新的模块采纳云端，本地更新的保留本地
@@ -2232,7 +2255,7 @@ function mergeCloudIntoLocal(cloud){
   const changes=[];
   const localMeta=loadSyncMeta();
   for(const k in cloud){
-    if(k==='loran_gh_token'||k==='__syncUpdatedAt'||k==='__syncMeta')continue;
+    if(k==='loran_cb_env'||k==='loran_gh_token'||k==='__syncUpdatedAt'||k==='__syncMeta'||k==='loran_fundImages')continue;
     const key=k.replace(/^loran_/,'');
     const cv=cloud[k];
     const local=localStorage.getItem(k);
@@ -2262,6 +2285,27 @@ function mergeCloudIntoLocal(cloud){
       }catch(e){}
       continue;
     }
+    if(k==='loran_transactions'){
+      // 账目合并：云端更新则采纳云端，但保留本地对应账单的收据（收据只存本地）
+      try{
+        const cloudTxs=JSON.parse(cv);
+        const localTxs=local?JSON.parse(local):[];
+        const localById={};
+        for(const t of localTxs){if(t&&t.id)localById[t.id]=t}
+        if(cloudModTs>localModTs){
+          for(const t of cloudTxs){
+            if(t&&t.id&&localById[t.id]&&localById[t.id].receipt&&!t.receipt)t.receipt=localById[t.id].receipt;
+          }
+          const mergedStr=JSON.stringify(cloudTxs);
+          if(mergedStr!==local){
+            setRemote('loran_transactions',mergedStr);
+            localMeta.transactions=cloudModTs;
+            changes.push({type:'tx_adopted',key:'transactions'});
+          }
+        }
+      }catch(e){}
+      continue;
+    }
     // 其它模块：云端时间戳更新 → 采纳云端
     if(cloudModTs>localModTs){
       setRemote(k,cv);
@@ -2284,19 +2328,19 @@ async function autoCloudCheck(){
   const status=$('#statusBadge');
   if(status){status.textContent='✓ 已同步';setTimeout(()=>{if(status.textContent==='✓ 已同步')status.textContent='● 实时'},4000)}
   // 有变化→把合并结果回传云端，避免被旧版本覆盖
-  setTimeout(cloudPush,2000);
+  setTimeout(()=>cloudPush(true),2000);
 }
 
-// 启动时拉取云端并合并（有 Token 才执行，无 Token 静默跳过）
+// 启动时拉取云端并合并（已配置环境才执行，未配置静默跳过）
 async function initialCloudSync(){
-  if(!localStorage.getItem('loran_gh_token'))return;
+  if(!localStorage.getItem('loran_cb_env'))return;
   const cloud=await fetchCloudData();
   if(!cloud)return;
   const changes=mergeCloudIntoLocal(cloud);
   if(!changes.length)return;
   loadData();
   if(PAGES[curPage])PAGES[curPage]();
-  setTimeout(cloudPush,2000);
+  setTimeout(()=>cloudPush(true),2000);
 }
 
 init();
