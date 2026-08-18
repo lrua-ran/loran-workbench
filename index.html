@@ -602,7 +602,7 @@ textarea.text-input{resize:vertical;min-height:60px}
       <div class="sidebar-foot-row">
         <button class="btn-sm" id="btnCloudPush" title="一键备份到CloudBase云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
       </div>
-      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2h · 史记 · 读书修身 · CloudBase 云同步</div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2i · 史记 · 读书修身 · CloudBase 云同步</div>
     </div>
   </aside>
 
@@ -629,7 +629,7 @@ textarea.text-input{resize:vertical;min-height:60px}
     <div class="content"><div class="container" id="contentArea"></div></div>
     <div class="foot-strip">
       <span>按 1-8 切换模块 · 数据本地持久化</span>
-      <span>&copy; Loran · 工作台 v5.2h</span>
+      <span>&copy; Loran · 工作台 v5.2i</span>
     </div>
   </main>
 </div>
@@ -2229,18 +2229,30 @@ async function cloudPush(silent){
     allData.__syncUpdatedAt=Date.now();
     const payload=JSON.stringify(allData);
     const col=app.database().collection('workbench');
-    // 固定 _id 'sync_data'，两端永远指向同一份数据。
-    // 直接 set()：文档不存在会自动创建、存在则整体覆盖，一个请求完成，天然幂等，绝不会撞重复键。
-    // （旧逻辑"先读→没有就 add({_id})"，两次推送并发时会同时 add 同一个 _id → E11000 duplicate key）
-    try{
-      await col.doc('sync_data').set({payload,updatedAt:Date.now()});
-    }catch(se){
-      const sm=errMsg(se);
-      if(!/not exist|NOT_EXIST|不存在|not found|NOT_FOUND/i.test(sm))throw new Error('【写云端】'+sm);
-      // 个别 SDK 版本的 set() 要求文档必须存在：确认真的没有后再退回 add()（已串行化，不会并发撞键）
-      try{await col.add({_id:'sync_data',payload,updatedAt:Date.now()})}
-      catch(e2){throw new Error('【写云端】'+errMsg(e2))}
+    // 固定 _id 'sync_data'，两端永远指向同一份数据。set() 幂等：不存在自动创建、存在整体覆盖。
+    // 两台设备几乎同时首次写入的极端并发下，MongoDB 的 upsert 仍可能撞 _id（E11000 duplicate key）→
+    // 遇到就自动重试：对方写完后，这一侧就变成普通更新，重试即成功。
+    let writeOk=false,lastErr=null;
+    for(let attempt=0;attempt<3&&!writeOk;attempt++){
+      if(attempt>0)await new Promise(r=>setTimeout(r,700));
+      try{
+        await col.doc('sync_data').set({payload,updatedAt:Date.now()});
+        writeOk=true;
+      }catch(se){
+        lastErr=errMsg(se);
+        const noDoc=/not exist|NOT_EXIST|不存在|not found|NOT_FOUND/i.test(lastErr);
+        const dupKey=/E11000|duplicate key/i.test(lastErr);
+        if(noDoc){
+          // 个别 SDK 版本的 set() 要求文档必须存在：真没有的话用 add() 创建
+          try{await col.add({_id:'sync_data',payload,updatedAt:Date.now()});writeOk=true;}
+          catch(e2){lastErr=errMsg(e2);}
+        }else if(!dupKey){
+          throw new Error('【写云端】'+lastErr); // 其它错误直接抛，不重试
+        }
+        // dupKey：并发撞键 → 进下一轮重试
+      }
     }
+    if(!writeOk)throw new Error('【写云端】'+lastErr);
     if(status)status.textContent='● 已同步';
   }catch(e){
     console.warn('云同步失败',e);
