@@ -602,7 +602,7 @@ textarea.text-input{resize:vertical;min-height:60px}
       <div class="sidebar-foot-row">
         <button class="btn-sm" id="btnCloudPush" title="一键备份到CloudBase云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
       </div>
-      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2f · 史记 · 读书修身 · CloudBase 云同步</div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2g · 史记 · 读书修身 · CloudBase 云同步</div>
     </div>
   </aside>
 
@@ -629,7 +629,7 @@ textarea.text-input{resize:vertical;min-height:60px}
     <div class="content"><div class="container" id="contentArea"></div></div>
     <div class="foot-strip">
       <span>按 1-8 切换模块 · 数据本地持久化</span>
-      <span>&copy; Loran · 工作台 v5.2f</span>
+      <span>&copy; Loran · 工作台 v5.2g</span>
     </div>
   </main>
 </div>
@@ -2242,7 +2242,7 @@ async function cloudPush(silent){
   }catch(e){
     console.warn('云同步失败',e);
     if(status)status.textContent='● 离线';
-    if(!silent)alert('云同步失败：'+errMsg(e)+'\n\n请对照检查（详见 Obsidian 部署指南）：\n① 安全来源：CloudBase 控制台 → 环境 → 安全配置 → 安全来源，添加 '+location.origin+'\n② 身份认证 → 登录方式 → 开启「匿名登录」\n③ 数据存储 → 创建集合 workbench → 权限选「所有用户可读可写」');
+    if(!silent)alert('云同步失败：'+errMsg(e)+'\n\n【当前配置】\n环境 ID：'+(localStorage.getItem('loran_cb_env')||'未配置')+'\n地域：'+(localStorage.getItem('loran_cb_region')||'ap-shanghai')+'\n\n请对照检查（详见 Obsidian 部署指南）：\n① 环境 ID 是否为【新建】环境的 ID（旧环境已销毁的话必须换成新的）\n② 身份认证 → 登录方式 → 开启「匿名登录」\n③ 数据存储 → 集合 workbench → 权限选「所有用户可读可写」\n④ 环境配置 → 安全来源 → 添加域名 '+location.host);
   }
   if(status)setTimeout(()=>{if(status.textContent==='⟳ 同步中'||status.textContent==='● 已同步')status.textContent='● 实时'},3500);
 }
