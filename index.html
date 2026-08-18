@@ -602,7 +602,7 @@ textarea.text-input{resize:vertical;min-height:60px}
       <div class="sidebar-foot-row">
         <button class="btn-sm" id="btnCloudPush" title="一键备份到CloudBase云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
       </div>
-      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2i · 史记 · 读书修身 · CloudBase 云同步</div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2j · 史记 · 读书修身 · CloudBase 云同步</div>
     </div>
   </aside>
 
@@ -629,7 +629,7 @@ textarea.text-input{resize:vertical;min-height:60px}
     <div class="content"><div class="container" id="contentArea"></div></div>
     <div class="foot-strip">
       <span>按 1-8 切换模块 · 数据本地持久化</span>
-      <span>&copy; Loran · 工作台 v5.2i</span>
+      <span>&copy; Loran · 工作台 v5.2j</span>
     </div>
   </main>
 </div>
@@ -2111,6 +2111,7 @@ window.editTodo=editTodo;
 // 为什么不用 LeanCloud 国内版：现在要求绑定"已备案的自定义域名"，个人没有备案域名用不了；
 //   国际版域名又自 2022 年起屏蔽国内 IP。CloudBase 是腾讯自家已备案域名 + 官方 Web SDK 自带跨域，国内手机/电脑都能直连。
 // 配置：localStorage['loran_cb_env'] 存「环境 ID」（形如 xxx-1a2b3c4d5），localStorage['loran_cb_region'] 存「地域」，每台设备配一次即可。
+const APP_VERSION='v5.2j';
 function getSyncConfig(){
   const regionName={'ap-shanghai':'上海','ap-guangzhou':'广州','ap-beijing':'北京','ap-singapore':'新加坡'};
   let env=localStorage.getItem('loran_cb_env');
@@ -2257,7 +2258,13 @@ async function cloudPush(silent){
   }catch(e){
     console.warn('云同步失败',e);
     if(status)status.textContent='● 离线';
-    if(!silent)alert('云同步失败：'+errMsg(e)+'\n\n【当前配置】\n环境 ID：'+(localStorage.getItem('loran_cb_env')||'未配置')+'\n地域：'+(localStorage.getItem('loran_cb_region')||'ap-shanghai')+'\n\n请对照检查（详见 Obsidian 部署指南）：\n① 环境 ID 是否为【新建】环境的 ID（旧环境已销毁的话必须换成新的）\n② 身份认证 → 登录方式 → 开启「匿名登录」\n③ 数据存储 → 集合 workbench → 权限选「所有用户可读可写」\n④ 环境配置 → 安全来源 → 添加域名 '+location.host);
+    const em=errMsg(e);
+    const dupKey=/E11000|duplicate key/i.test(em);
+    let tip='请对照检查（详见 Obsidian 部署指南）：\n① 环境 ID 是否为【新建】环境的 ID\n② 身份认证 → 登录方式 → 开启「匿名登录」\n③ 数据库 → 集合 workbench → 权限选「所有用户可读可写」\n④ 环境配置 → 安全来源 → 添加域名 '+location.host;
+    if(dupKey){
+      tip='🔴 这是【集合权限】问题，不是代码问题！\n\n两台设备各有自己的匿名身份，sync_data 文档是另一个身份创建的；\n只要权限不是「所有用户可读可写」，另一台设备就永远写不了（云端把别人的文档过滤掉 → 重复插入 → E11000）。\n\n请到 CloudBase 控制台 → 数据库 → 集合 workbench → 权限设置 → 选「所有用户可读可写」→ 保存，然后回来再点云备份。';
+    }
+    if(!silent)alert('云同步失败：'+em+'\n\n【版本】'+APP_VERSION+'\n【当前配置】\n环境 ID：'+(localStorage.getItem('loran_cb_env')||'未配置')+'\n地域：'+(localStorage.getItem('loran_cb_region')||'ap-shanghai')+'\n\n'+tip);
   }finally{
     _cloudSyncing=false;
     if(_cloudPending){_cloudPending=false;cloudPush(true);} // 补推一次，把等待期间的新改动推上去
