@@ -602,7 +602,7 @@ textarea.text-input{resize:vertical;min-height:60px}
       <div class="sidebar-foot-row">
         <button class="btn-sm" id="btnCloudPush" title="一键备份到CloudBase云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
       </div>
-      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2e · 史记 · 读书修身 · CloudBase 云同步</div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2f · 史记 · 读书修身 · CloudBase 云同步</div>
     </div>
   </aside>
 
@@ -629,7 +629,7 @@ textarea.text-input{resize:vertical;min-height:60px}
     <div class="content"><div class="container" id="contentArea"></div></div>
     <div class="foot-strip">
       <span>按 1-8 切换模块 · 数据本地持久化</span>
-      <span>&copy; Loran · 工作台 v5.2e</span>
+      <span>&copy; Loran · 工作台 v5.2f</span>
     </div>
   </main>
 </div>
@@ -2171,7 +2171,11 @@ async function getCBApp(){
   }
   if(!_cbAuthed){
     try{
-      await _cbApp.auth().signInAnonymously();
+      const auth=_cbApp.auth();
+      // 新版 @cloudbase/js-sdk 用 anonymousAuthProvider().signIn()；
+      // signInAnonymously() 是旧版 tcb-js-sdk 的废弃 API，可能"看似成功实则没建立登录态"→ 导致数据库报 unauthenticated。
+      if(auth.anonymousAuthProvider)await auth.anonymousAuthProvider().signIn();
+      else await auth.signInAnonymously();
       _cbAuthed=true;
     }catch(ae){
       throw new Error((ae&&(ae.message||ae.errMsg||ae.error))||'匿名登录失败：请在 CloudBase 控制台 → 身份认证 → 登录方式，开启「匿名登录」');
