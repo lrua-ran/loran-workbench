@@ -602,7 +602,7 @@ textarea.text-input{resize:vertical;min-height:60px}
       <div class="sidebar-foot-row">
         <button class="btn-sm" id="btnCloudPush" title="一键备份到CloudBase云端" style="width:100%;background:var(--blue-glow);border-color:var(--blue);color:var(--blue)">☁️ 云备份</button>
       </div>
-      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2g · 史记 · 读书修身 · CloudBase 云同步</div>
+      <div class="sidebar-foot-row" style="justify-content:center;font-size:9px;color:var(--ink-faint)">v5.2h · 史记 · 读书修身 · CloudBase 云同步</div>
     </div>
   </aside>
 
@@ -629,7 +629,7 @@ textarea.text-input{resize:vertical;min-height:60px}
     <div class="content"><div class="container" id="contentArea"></div></div>
     <div class="foot-strip">
       <span>按 1-8 切换模块 · 数据本地持久化</span>
-      <span>&copy; Loran · 工作台 v5.2g</span>
+      <span>&copy; Loran · 工作台 v5.2h</span>
     </div>
   </main>
 </div>
@@ -2215,8 +2215,11 @@ function setRemote(key,value){
   try{localStorage.setItem(key,value)}catch(e){}finally{_applyingRemote=false}
 }
 
+let _cloudSyncing=false,_cloudPending=false;
 async function cloudPush(silent){
   const env=localStorage.getItem('loran_cb_env');if(!env)return; // 未配置时静默跳过（手动按钮负责引导）
+  if(_cloudSyncing){_cloudPending=true;return;} // 上次还没推完：本次合并成"稍后补推一次"，避免并发撞键
+  _cloudSyncing=true;
   const status = $('#statusBadge'); if(status) status.textContent = '⟳ 同步中';
   try{
     const app=await getCBApp().catch(e=>{throw new Error('【身份认证】'+errMsg(e))});
@@ -2226,23 +2229,26 @@ async function cloudPush(silent){
     allData.__syncUpdatedAt=Date.now();
     const payload=JSON.stringify(allData);
     const col=app.database().collection('workbench');
-    // 用固定 _id 'sync_data'，两端永远指向同一份数据
-    let r;
+    // 固定 _id 'sync_data'，两端永远指向同一份数据。
+    // 直接 set()：文档不存在会自动创建、存在则整体覆盖，一个请求完成，天然幂等，绝不会撞重复键。
+    // （旧逻辑"先读→没有就 add({_id})"，两次推送并发时会同时 add 同一个 _id → E11000 duplicate key）
     try{
-      r=await col.doc('sync_data').get();
-    }catch(e){throw new Error('【读云端】'+errMsg(e))}
-    try{
-      if(r&&r.data&&r.data.length){
-        await col.doc('sync_data').set({payload,updatedAt:Date.now()});
-      }else{
-        await col.add({_id:'sync_data',payload,updatedAt:Date.now()});
-      }
-    }catch(e){throw new Error('【写云端】'+errMsg(e))}
+      await col.doc('sync_data').set({payload,updatedAt:Date.now()});
+    }catch(se){
+      const sm=errMsg(se);
+      if(!/not exist|NOT_EXIST|不存在|not found|NOT_FOUND/i.test(sm))throw new Error('【写云端】'+sm);
+      // 个别 SDK 版本的 set() 要求文档必须存在：确认真的没有后再退回 add()（已串行化，不会并发撞键）
+      try{await col.add({_id:'sync_data',payload,updatedAt:Date.now()})}
+      catch(e2){throw new Error('【写云端】'+errMsg(e2))}
+    }
     if(status)status.textContent='● 已同步';
   }catch(e){
     console.warn('云同步失败',e);
     if(status)status.textContent='● 离线';
     if(!silent)alert('云同步失败：'+errMsg(e)+'\n\n【当前配置】\n环境 ID：'+(localStorage.getItem('loran_cb_env')||'未配置')+'\n地域：'+(localStorage.getItem('loran_cb_region')||'ap-shanghai')+'\n\n请对照检查（详见 Obsidian 部署指南）：\n① 环境 ID 是否为【新建】环境的 ID（旧环境已销毁的话必须换成新的）\n② 身份认证 → 登录方式 → 开启「匿名登录」\n③ 数据存储 → 集合 workbench → 权限选「所有用户可读可写」\n④ 环境配置 → 安全来源 → 添加域名 '+location.host);
+  }finally{
+    _cloudSyncing=false;
+    if(_cloudPending){_cloudPending=false;cloudPush(true);} // 补推一次，把等待期间的新改动推上去
   }
   if(status)setTimeout(()=>{if(status.textContent==='⟳ 同步中'||status.textContent==='● 已同步')status.textContent='● 实时'},3500);
 }
