@@ -40,29 +40,99 @@ body{
 
 /* ===== 主题 2 · 水墨山水 ===== */
 :root[data-theme="ink"]{
-  --bg:#EDEAE3;
-  --bg-deep:#DCE0E2;
-  --paper:#F6F4EE;
-  --paper-edge:#E3E2DA;
-  --ink:#1F2935;
-  --ink-soft:#4A5460;
-  --ink-faint:#8A949E;
-  --rule:#C6CAC6;
-  --gold:#4E6E8A;
-  --gold-soft:#6E8CA0;
-  --gold-glow:rgba(78,110,138,.12);
+  --bg:#E9EEF2;
+  --bg-deep:#DCE4EA;
+  --paper:#F6F9FB;
+  --paper-edge:#E0E7ED;
+  --ink:#1D2B38;
+  --ink-soft:#46566B;
+  --ink-faint:#8AA0B4;
+  --rule:#C9D4DE;
+  --gold:#3F6D8C;
+  --gold-soft:#5B8DB8;
+  --gold-glow:rgba(63,109,140,.12);
   --vermilion:#9B4A40;
   --jade:#5F7A6A;
-  --blue:#2C4A66;
-  --blue-light:#CCD8E2;
-  --blue-glow:rgba(44,74,102,.15);
-  --shadow:0 2px 8px rgba(30,40,55,.04),0 12px 28px rgba(30,40,55,.03);
-  --shadow-hover:0 6px 18px rgba(30,40,55,.08),0 16px 36px rgba(30,40,55,.05);
-  --bg-pattern:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='800'%3E%3Cfilter id='b'%3E%3CfeTurbulence baseFrequency='0.007' numOctaves='3' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.17 0 0 0 0 0.29 0 0 0 0 0.40 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3Cpath d='M80 700 Q200 500 350 620 T600 560' stroke='rgba(44,74,102,0.08)' fill='none' stroke-width='60' stroke-linecap='round'/%3E%3Cpath d='M20 650 Q150 580 300 640 T580 600' stroke='rgba(155,74,64,0.04)' fill='none' stroke-width='40' stroke-linecap='round'/%3E%3C/svg%3E"),
-    radial-gradient(circle at 8% 4%,rgba(44,74,102,.10) 0,transparent 20%),
-    radial-gradient(circle at 92% 96%,rgba(44,74,102,.08) 0,transparent 24%),
-    radial-gradient(circle at 30% 80%,rgba(155,74,64,.05) 0,transparent 14%);
+  --blue:#2C5C85;
+  --blue-light:#D3E2EF;
+  --blue-glow:rgba(44,92,133,.15);
+  --shadow:0 2px 8px rgba(28,46,58,.05),0 12px 28px rgba(28,46,58,.04);
+  --shadow-hover:0 6px 18px rgba(28,46,58,.10),0 16px 36px rgba(28,46,58,.07);
+  /* —— 侧边栏 · 蓝调深黛 —— */
+  --sb-bg:#152433;
+  --sb-bg-2:#1C2F42;
+  --sb-rule:rgba(215,226,236,.10);
+  --sb-text:#E3ECF4;
+  --sb-soft:#A9BDCF;
+  --sb-faint:#7E96AC;
+  --sb-accent:#6FA3CC;
+  --sb-accent-soft:rgba(111,163,204,.16);
+  --sb-seal-1:#2C5C85;
+  --sb-seal-2:#4E86AE;
+  --bg-pattern:
+    radial-gradient(circle at 8% 4%,rgba(44,92,133,.08) 0,transparent 22%),
+    radial-gradient(circle at 92% 96%,rgba(63,109,140,.06) 0,transparent 26%),
+    radial-gradient(circle at 30% 80%,rgba(91,141,184,.05) 0,transparent 16%);
 }
+
+/* ===== 主题 2.1 · ink 侧边栏 · 蓝调深黛（质感） ===== */
+:root[data-theme="ink"] .sidebar{
+  background:
+    radial-gradient(120% 55% at 18% 0%,rgba(111,163,204,.13) 0%,transparent 48%),
+    radial-gradient(140% 70% at 100% 100%,rgba(63,109,140,.16) 0%,transparent 55%),
+    linear-gradient(180deg,var(--sb-bg) 0%,var(--sb-bg-2) 100%);
+  border-right:1px solid rgba(215,226,236,.08);
+  box-shadow:6px 0 28px rgba(9,18,27,.28);
+}
+:root[data-theme="ink"] .sidebar-close{color:var(--sb-soft);border-color:var(--sb-rule)}
+:root[data-theme="ink"] .sidebar-close:hover{background:var(--sb-accent-soft);border-color:var(--sb-accent);color:var(--sb-accent)}
+:root[data-theme="ink"] .brand{border-bottom-color:var(--sb-rule)}
+:root[data-theme="ink"] .brand-seal{
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--sb-seal-1),var(--sb-seal-2));
+  color:#EFF6FB;
+  font-family:"Songti SC","STSong",serif;
+  box-shadow:0 2px 10px rgba(8,16,24,.35),inset 0 0 0 1px rgba(255,255,255,.14);
+}
+:root[data-theme="ink"] .brand-name{color:var(--sb-text)}
+:root[data-theme="ink"] .brand-sub{color:var(--sb-faint)}
+:root[data-theme="ink"] .nav-label{color:var(--sb-faint);letter-spacing:.34em}
+:root[data-theme="ink"] .nav-item{position:relative;color:var(--sb-soft)}
+:root[data-theme="ink"] .nav-item:hover{background:rgba(215,226,236,.06);color:var(--sb-text)}
+:root[data-theme="ink"] .nav-item.active{
+  background:var(--sb-accent-soft);
+  color:var(--sb-accent);
+  font-weight:600;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+:root[data-theme="ink"] .nav-item.active::before{
+  content:"";position:absolute;left:-14px;top:9px;bottom:9px;width:3px;border-radius:2px;
+  background:linear-gradient(180deg,#7FB0D4,#4E86AE);
+  box-shadow:0 0 10px rgba(111,163,204,.75);
+}
+:root[data-theme="ink"] .nav-kbd{
+  color:var(--sb-faint);
+  background:rgba(9,18,27,.38);
+  border-color:var(--sb-rule);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.25);
+}
+:root[data-theme="ink"] .sidebar-foot{border-top-color:var(--sb-rule)}
+:root[data-theme="ink"] .sidebar-foot-row{color:var(--sb-faint)}
+:root[data-theme="ink"] .sidebar-foot .live-dot{background:#7FB0D4;animation:pulseInk 2s infinite}
+@keyframes pulseInk{0%{box-shadow:0 0 0 0 rgba(111,163,204,.5)}70%{box-shadow:0 0 0 6px rgba(111,163,204,0)}100%{box-shadow:0 0 0 0 rgba(111,163,204,0)}}
+:root[data-theme="ink"] .sidebar-foot .btn-sm{
+  background:rgba(111,163,204,.12)!important;
+  border-color:rgba(111,163,204,.38)!important;
+  color:var(--sb-accent)!important;
+}
+:root[data-theme="ink"] .sidebar-foot .btn-sm:hover{
+  background:rgba(111,163,204,.26)!important;
+  border-color:var(--sb-accent)!important;
+  color:#D7E8F5!important;
+}
+:root[data-theme="ink"] .sidebar-overlay{background:rgba(14,23,32,.42)}
+:root[data-theme="ink"] .topbar{background:rgba(233,238,242,.86)}
+:root[data-theme="ink"] .learn-card{background:linear-gradient(135deg,var(--paper) 0%,var(--bg-deep) 100%)}
 
 /* ===== 主题 3 · 暮光玫瑰 ===== */
 :root[data-theme="rose"]{
